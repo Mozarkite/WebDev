@@ -11,42 +11,72 @@
 
   <title>Net Tracker</title>
 </head>
-<body class =  "bg-dark">
+<body class="bg-dark">
 
-  <!--style = "background-color: brown;-->
-  <div class="container-fluid py-5">
+  <div class="container-fluid py-5" id="home">
     <div class="row gx-4">
       <!-- Red container -->
       <div class="col-12 col-lg-7 mb-4 mb-lg-0">
-        <div class="bg-danger rounded-5 text-center p-5 p-lg-5 mt-5 mx-5 h-150 d-flex align-items-center justify-content-center" style = "border-radius: 25px;">
+        <div class="bg-danger rounded-5 text-center p-5 mt-5 mx-5 d-flex align-items-center justify-content-center" style="border-radius: 25px; min-height: 80vh;">
           <img src="Assets/production.png" class="img-fluid" style="max-height: 80vh;" alt="Prod">
         </div>
       </div>
 
       <!-- Black box -->
       <div class="col-12 col-lg-4 mt-5">
-  <div class="rounded-3 h-100 d-flex flex-column justify-content-center align-items-center text-center" 
-       style="min-height: 50vh; border-radius: 25px;">
-    <img src="Assets/calendar-249.png" class="img-fluid" style="max-height: 10vh;" alt="Prod">
-    <h2 class = "font-monospace" style = "color: aliceblue;">Productivity and Organization</h2>
-    <p class = "font-monospace" style = "color: darkgray;"> Organization App </p>
-    
-    <button type="button" class="btn btn-danger">Get Started</button>
-    <p></p>
-    <p></p>
-    <p class = "font-monospace" style = "color: darkgray;">Developed By </p>
-    <p><a href="https://github.com/Mozarkite" target="_blank" class="link-danger link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Mozarkite</a>
-    <a href="https://github.com/10xyou" target="_blank class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">10xyou</a> </p>
+        <div class="rounded-3 h-100 d-flex flex-column justify-content-center align-items-center text-center" style="min-height: 50vh; border-radius: 25px;">
+          <img src="Assets/logo.png" class="img-fluid" style="max-height: 10vh;" alt="Prod">
+          <h2 class="font-monospace text-light">Productivity and Organization</h2>
+          <p class="font-monospace text-secondary">Organization App</p>
+          
+          <button type="button" class="btn btn-danger" data-page="login">Get Started</button>
 
-  
-
-  </div>
-</div>
-
+          <p class="font-monospace text-secondary mt-4">Developed By</p>
+          <p>
+            <a href="https://github.com/Mozarkite" target="_blank" class="link-danger link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Mozarkite</a>
+            <a href="https://github.com/10xyou" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">10xyou</a>
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- Main Screen (hidden) -->
+  <div class="container-fluid py-4 d-none" id="login">
+    <div class = "container-fluid">
+      
+      <nav class="navbar navbar-dark bg-danger rounded-5 navbar-expand-lg justify-content-center" style = "border-radius: 5px; min-height: 10vh;">
+  <div class="container-fluid">
+    
+    <!-- Brand -->
+    <a class="navbar-brand" href="#"><img src="Assets/logo.png" class="img-fluid" style="max-height: 10vh;" alt="Prod"></a>
+    
+    <!-- Toggler button for mobile -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Collapsible links -->
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-3">
+        <li class="nav-item"><a class="nav-link active link-light" href="#" style = "font-size: larger; min-height: 4vh;"> <i class="fa fa-tachometer" aria-hidden="true"></i>
+          Main Dashboard</a> </li>
+        
+        <li class="nav-item"><a class="nav-link active link-light" href="#" style = "font-size: larger;"><i class="fa fa-user-plus" aria-hidden="true"></i>
+          Log In</a></li>
+        <li class="nav-item"><a class="nav-link active link-light" href="#"style = "font-size: larger;"><i class="fa fa-plus" aria-hidden="true"></i>
+          Create Tasks</a></li>
+      </ul>
+    </div>
+
+    </div>
+  </nav>
+</div>
+
+
+  <script src="script.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-  
 </body>
+
 </html>
