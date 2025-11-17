@@ -9,11 +9,9 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-  <title>Toodoo</title>
+<title>Toodoo</title>
 </head>
 <body class="bg-dark">
-
-</div>
 
   <div class="container-fluid py-5" id="home">
     <div class="row gx-4">
@@ -31,7 +29,7 @@
           <h2 class="font-monospace text-light">Productivity and Organization</h2>
           <p class="font-monospace text-secondary">Organization App</p>
           
-          <button type="button" class="btn btn-danger" data-page="login">Get Started</button>
+          <button type="button" class="btn btn-danger" data-page="main">Get Started</button>
 
           <p class="font-monospace text-secondary mt-4">Developed By</p>
           <p>
@@ -44,80 +42,169 @@
   </div>
 
 
+  <nav class="navbar navbar-dark bg-danger rounded-5 navbar-expand-lg justify-content-center shadow-lg" style="border-radius: 5px; min-height: 10vh;">
+        <div class="container-fluid">
+          
+          <!-- Brand -->
+          <a class="navbar-brand" href="#" data-page="home"><img src="Assets/logo.png" class="img-fluid" style="max-height: 10vh;" alt="Prod"></a>
+          
+          <!-- Toggler button for mobile -->
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <!-- Collapsible buttons -->
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="navbar-nav ms-3">
+              <button type="button" class="btn btn-link nav-link link-light" data-page="main" style="font-size: larger; min-height: 4vh;">
+                <i class="fa fa-tachometer" aria-hidden="true"></i> Main Dashboard
+              </button>
+
+              <button type="button" class="btn btn-link nav-link link-light" data-page="login" style="font-size: larger;">
+                <i class="fa fa-user-plus" aria-hidden="true"></i> Log In
+              </button>
+
+              <button type="button" class="btn btn-link nav-link link-light" data-page="create-tasks" style="font-size: larger;">
+                <i class="fa fa-plus" aria-hidden="true"></i> Create Tasks
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
   <!-- Main Screen (hidden) -->
-  <div class="container-fluid py-4 d-none" id="login">
-    <div class = "container-fluid">
-      
-      <nav class="navbar navbar-dark bg-danger rounded-5 navbar-expand-lg justify-content-center" style = "border-radius: 5px; min-height: 10vh;">
-  <div class="container-fluid">
-    
-    <!--Brand -->
-    <a class="navbar-brand" href="#"><img src="Assets/logo.png" class="img-fluid" style="max-height: 10vh;" alt="Prod"></a>
-    
-    <!-- Toggler button for mobile -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+  <div class="container-fluid py-4 d-none" id="main">
+      <div class="row gx-4 flex">
+        <div class="col-12 col-lg-3 mb-4 mb-lg-0">
+          <div class="bg-danger rounded-5 text-center p-5 mt-5 mx-2 d-flex flex-column align-items-center justify-content-start shadow-lg" style="border-radius: 5px; min-height: 50vh; min-width: 20vh;">
+            <h2 id="welcomeUser" class="text-white fw-bold mb-4">Welcome <br> Guest</h2>
+            <img src="Assets/Guest-user.png" class="img-fluid rounded-circle" style="max-width: 100%; height: auto; max-height: 20vh;" alt="Profile Picture">
+            <button type="button" class="btn btn-light mt-2" data-page="profile">Profile</button>
+            <button type="button" class="btn btn-light mt-2" id="logoutBtn">Log Out</button>
+          </div>
+        </div>
 
-    <!-- Collapsible links -->
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-3">
-        <li class="nav-item"><a class="nav-link active link-light" href="#" style = "font-size: larger; min-height: 4vh;"> <i class="fa fa-tachometer" aria-hidden="true"></i>
-          Main Dashboard</a> </li>
-        
-        <li class="nav-item"><a class="nav-link active link-light" href="#" style = "font-size: larger;"><i class="fa fa-user-plus" aria-hidden="true"></i>
-          Log In</a></li>
-        <li class="nav-item"><a class="nav-link active link-light" href="#"style = "font-size: larger;"><i class="fa fa-plus" aria-hidden="true"></i>
-          Create Tasks</a></li>
-      </ul>
+        <div class="col-12 col-lg-5 mb-2 mb-lg-0">
+          <div class="bg-danger rounded-5 text-center p-5 mt-5 mx-2 d-flex align-items-start justify-content-center shadow-lg" style="border-radius: 5px; min-height: 50vh; min-width: 20vh;">
+            <h2 class="text-white fw-bold mb-4">Searching Function of DB</h2>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-4 mb-4 mb-lg-0">
+          <div class="bg-danger rounded-5 text-center p-5 mt-5 mx-2 d-flex align-items-start justify-content-center shadow-lg" style="border-radius: 5px; min-height: 50vh; min-width: 20vh;">
+            <h2 class="text-white fw-bold mb-4">Making the Too doo list</h2>
+          </div>
+        </div>
+      </div>
+  </div>
+
+  <!-- Log in section of the web page -->
+  <div class="container-fluid d-none" id="login">
+    <div class="row gx-4 justify-content-center flex">
+      <div class="col-12 col-lg-5 mb-2 mb-lg-0">
+        <div class="bg-danger rounded-5 text-center p-5 mt-5 mx-2 d-flex flex-column align-items-center justify-content-center shadow-lg" style="border-radius: 5px; min-height: 50vh; min-width: 20vh;">
+          <h2 class="text-white fw-bold mb-4">TooDoo™</h2>
+
+          
+            <form id="loginForm">
+            <div class="form-group text-light">
+              <label for="LoginEmail">Email</label>
+              <input type="email" class="form-control" id="LoginEmail" placeholder="Enter Email">
+            </div>
+
+            <div class="form-group mt-2 text-light">
+              <label for="LoginPassword">Password</label>
+              <input type="password" class="form-control" id="LoginPassword" placeholder="Enter Password">
+            </div>
+
+            <button type="submit" class="btn btn-light mt-3">Log In</button>
+            </form>
+          <button type="button" class="btn btn-light mt-3" data-page="Create">Create Account</button>
+          
+        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- Account Creation of the web page -->
+  <div class="container-fluid d-none" id="Create">
+  <div class="row gx-4 justify-content-center flex">
+    <div class="col-12 col-lg-5 mb-2 mb-lg-0">
+      <div class="bg-danger rounded-5 text-center p-5 mt-5 mx-2 d-flex flex-column align-items-center justify-content-center shadow-lg" style="border-radius: 5px; min-height: 50vh; min-width: 20vh;">
+        <h2 class="text-white fw-bold mb-4">TooDoo™</h2>
+
+        <form id="createAccountForm">
+  <div class="form-group text-light">
+    <label for="createUsername">Username</label>
+    <input type="text" class="form-control justify-content-center" id="createUsername" placeholder="Enter Username">
+  </div>
+  <div class="form-group mt-2 text-light">
+    <label for="createEmail">Email</label>
+    <input type="email" class="form-control justify-content-center" id="createEmail" placeholder="Email Address">
+  </div>
+  <div class="form-group mt-2 text-light">
+    <label for="createPassword">Password</label>
+    <input type="password" class="form-control justify-content-center" id="createPassword" placeholder="Enter Password">
+  </div>
+
+  <button type="submit" class="btn btn-light mt-3">Create Account</button>
+</form>
+      </div>
     </div>
-  </nav>
+  </div>
+</div>
 
-  <div class="row gx-4 flex">
 
-  <div class="col-12 col-lg-3 mb-4 mb-lg-0">
-    <div class="bg-danger rounded-5 text-center p-5 mt-5 mx-2 d-flex flex-column align-items-center justify-content-start"style="border-radius: 5px; min-height: 50vh; min-width: 20vh;">
-      <h2 class="text-white fw-bold mb-4">Welcome <br> Guest</h2>
-      <img src="Assets/Guest-user.png"class="img-fluid rounded-circle"style="max-width: 100%; height: auto; max-height: 20vh;" alt="Profile Picture">
-      <button type="button" class="btn btn-light mt-2" data-page="nothing-yet">View Profile</button>
-      <button type="button" class="btn btn-light mt-2" data-page="nothing-yet">testing</button>
+<!-- profile section of the web page -->
+  <div class="container-fluid d-none" id="profile">
+    <div class="row gx-4 flex">
+      <div class="col-12 col-lg-5 mb-2 mb-lg-0">
+        <div class="bg-danger rounded-5 text-center p-5 mt-5 mx-2 d-flex flex-column align-items-center justify-content-center" style="border-radius: 5px; min-height: 50vh; min-width: 20vh;">
+          <img src="Assets/Guest-user.png" class="img-fluid rounded-circle" style="max-width: 100%; height: auto; max-height: 20vh;" alt="Profile Picture">
 
+          <h4 id="profileUsername" class="text-white fw-bold mb-4">Username</h4>
+          <h4 id="profileID" class="text-white fw-bold mb-4">User ID</h4>
+          <button type="submit" class="btn btn-light mt-3" data-page="change">Change Username</button>
+          <button id="deleteAccountBtn" class="btn btn-light mt-3">Delete Account</button>
+          
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change section of the web page -->
+  <div class="container-fluid d-none" id="change">
+    <div class="row gx-4 flex">
+      <div class="col-12 col-lg-5 mb-2 mb-lg-0">
+        <div class="bg-danger rounded-5 text-center p-5 mt-5 mx-2 d-flex flex-column align-items-center justify-content-center" style="border-radius: 5px; min-height: 50vh; min-width: 20vh;">
+          <img src="Assets/Guest-user.png" class="img-fluid rounded-circle" style="max-width: 100%; height: auto; max-height: 20vh;" alt="Profile Picture">
+
+          <form id="changeUsernameForm">
+  <div class="form-group text-light">
+    <label for="newUsername">New Username</label>
+    <input type="text" class="form-control" id="newUsername" placeholder="Enter New Username">
+  </div>
+  <button type="submit" class="btn btn-light mt-3">Change username</button>
+</form>
+
+
+        </div>
+      </div>
     </div>
   </div>
 
 
 
-
-<div class="col-12 col-lg-5 mb-2 mb-lg-0">
-  <div class="bg-danger rounded-5 text-center p-5 mt-5 mx-2 d-flex align-items-start justify-content-center" style="border-radius: 5px; min-height: 50vh; min-width: 20vh;">
-    <h2 class="text-white fw-bold mb-4">Searching Function of DB</h2>
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-dark bg-opacity-75 d-none" style="z-index: 1050;">
+    <div class="spinner-border text-danger" role="status" style="width: 4rem; height: 4rem;">
+      <span class="visually-hidden">Loading...</span>
+    </div>
   </div>
-</div>
-
-<div class="col-12 col-lg-4 mb-4 mb-lg-0">
-  <div class="bg-danger rounded-5 text-center p-5 mt-5 mx-2 d-flex  align-items-start justify-content-center" style="border-radius: 5px; min-height: 50vh; min-width: 20vh;">
-    <h2 class="text-white fw-bold mb-4">Making the Too doo list</h2>
-  </div>
-</div>
-
-
-</div>
-
-</div>
-
-<!-- Loading Overlay -->
-<div id="loading-overlay" 
-    class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-dark bg-opacity-75 d-none"
-    style="z-index: 1050;">
-  <div class="spinner-border text-danger" role="status" style="width: 4rem; height: 4rem;">
-    <span class="visually-hidden">Loading...</span>
-  </div>
-</div>
 
   <script src="script.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
