@@ -35,6 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const pages = document.querySelectorAll('.container-fluid[id]');
     pages.forEach(p => p.classList.toggle('d-none', p.id !== pageId));
     history.pushState({ page: pageId }, '', pageId);
+
+    const nav = document.getElementById('mainNav');
+    if (pageId === 'home') {
+      nav.classList.add('d-none');   // hide on landing
+    } 
+    else {
+      nav.classList.remove('d-none'); // show everywhere else
+    }
   }
 
   window.addEventListener('popstate', (e) => {
@@ -242,3 +250,4 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
+
