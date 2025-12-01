@@ -1,0 +1,68 @@
+-- Users table
+CREATE TABLE Users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(100) NOT NULL,   
+    email VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- Premade tasks table
+CREATE TABLE Db_tasks (
+    task_id SERIAL PRIMARY KEY,
+    task_name VARCHAR(100) NOT NULL,
+    task_category VARCHAR(50) NOT NULL,
+    task_importance INT NOT NULL,
+    task_time_limit TIMESTAMPTZ        --optional due date for premade tasks
+);
+
+-- Users-created tasks table
+CREATE TABLE User_tasks (
+    task_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    task_name VARCHAR(100) NOT NULL,
+    task_category VARCHAR(50) NOT NULL,
+    task_importance INT NOT NULL,
+    task_time_limit TIMESTAMPTZ,       --user can set a due date
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+-- To-do list table: contains tasks that a user plans to do
+-- Can link to either User_tasks or Db_tasks
+CREATE TABLE User_to_do_list (
+    todo_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    user_task_id INT,                  
+    db_task_id INT,                    
+    task_name VARCHAR(100) NOT NULL,
+    task_category VARCHAR(50) NOT NULL,
+    task_importance INT NOT NULL,
+    task_time_limit TIMESTAMPTZ,
+    added_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_task_id) REFERENCES User_tasks(task_id) ON DELETE CASCADE,
+    FOREIGN KEY (db_task_id) REFERENCES Db_tasks(task_id) ON DELETE CASCADE,
+    CHECK ((user_task_id IS NOT NULL AND db_task_id IS NULL) OR
+           (user_task_id IS NULL AND db_task_id IS NOT NULL))
+);
+
+-- Completed tasks table
+CREATE TABLE User_completed_tasks (
+    completed_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    todo_id INT NOT NULL,               --the task from User_to_do_list that was completed
+    completed_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (todo_id) REFERENCES User_to_do_list(todo_id) ON DELETE CASCADE
+);
+
+INSERT INTO Db_tasks (task_name, task_category, task_importance, task_time_limit) VALUES
+('Clean your room', 'Household', 2, NULL),
+('Do your laundry', 'Household', 3, NULL),
+('Study for 1 hour', 'Education', 4, NULL),
+('Read a chapter of a book', 'Personal Development', 2, NULL),
+('Go for a 30-minute walk', 'Health', 3, NULL),
+('Cook a healthy meal', 'Health', 3, NULL),
+('Organize your workspace', 'Productivity', 4, NULL),
+('Plan your week', 'Planning', 5, NULL),
+('Meditate for 10 minutes', 'Wellbeing', 1, NULL),
+('Drink 2 litres of water', 'Health', 1, NULL);
