@@ -86,10 +86,33 @@
         </div>
 
         <div class="col-12 col-lg-5 mb-2 mb-lg-0">
-          <div class="bg-danger rounded-5 text-center p-5 mt-5 mx-2 d-flex align-items-start justify-content-center shadow-lg" style="border-radius: 5px; min-height: 50vh; min-width: 20vh;">
-            <h2 class="text-white fw-bold mb-4">Searching Function of DB</h2>
-          </div>
-        </div>
+  <div class="bg-danger rounded-5 text-center p-5 mt-5 mx-2 d-flex flex-column align-items-center shadow-lg" 
+       style="border-radius: 5px; min-height: 50vh; min-width: 20vh;">
+
+    <h2 class="text-white fw-bold mb-4">Searching Function of DB</h2>
+
+    <!-- DB Tasks Search Form -->
+    <form id="dbTasksSearchForm" class="mb-3 w-100" style="max-width: 100%;">
+      <input id="dbSearchInput" type="search" class="form-control mb-2" placeholder="Search tasks or category..." />
+      <button type="submit" class="btn btn-light w-100">Search</button>
+    </form>
+
+    <!-- Scrollable DB Tasks List -->
+    <div id="dbTasksList" class="w-100" style="
+        max-height: 40vh;
+        overflow-y: auto;
+        border: 1px solid #fff;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.1);
+        padding: 10px;
+        color: #fff;
+        text-align: left;
+      ">
+      <div>Loading tasks...</div>
+    </div>
+    
+  </div>
+</div>
 
         <div class="col-12 col-lg-4 mb-4 mb-lg-0">
           <div class="bg-danger rounded-5 text-center p-5 mt-5 mx-2 d-flex align-items-start justify-content-center shadow-lg" style="border-radius: 5px; min-height: 50vh; min-width: 20vh;">
