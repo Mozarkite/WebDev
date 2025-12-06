@@ -55,6 +55,7 @@ CREATE TABLE User_completed_tasks (
     FOREIGN KEY (todo_id) REFERENCES User_to_do_list(todo_id) ON DELETE CASCADE
 );
 
+
 INSERT INTO Db_tasks (task_name, task_category, task_importance, task_time_limit) VALUES
 ('Clean your room', 'Household', 2, NULL),
 ('Do your laundry', 'Household', 3, NULL),
@@ -65,4 +66,36 @@ INSERT INTO Db_tasks (task_name, task_category, task_importance, task_time_limit
 ('Organize your workspace', 'Productivity', 4, NULL),
 ('Plan your week', 'Planning', 5, NULL),
 ('Meditate for 10 minutes', 'Wellbeing', 1, NULL),
-('Drink 2 litres of water', 'Health', 1, NULL);
+('Drink 2 litres of water', 'Health', 1, NULL),
+('Call a friend', 'Social', 2, NULL),
+('Write in your journal', 'Personal Development', 3, NULL),
+('Take a 20-minute power nap', 'Health', 2, NULL),
+('Stretch for 10 minutes', 'Health', 2, NULL),
+('Practice a hobby for 30 minutes', 'Personal Development', 3, NULL),
+('Update your resume', 'Career', 4, NULL),
+('Check your email inbox', 'Productivity', 2, NULL),
+('Plan a vacation', 'Planning', 4, NULL),
+('Clean out your fridge', 'Household', 3, NULL),
+('Watch an educational video', 'Education', 2, NULL),
+('Take a walk in nature', 'Wellbeing', 3, NULL),
+('Declutter your desk', 'Productivity', 2, NULL),
+('Write a to-do list for tomorrow', 'Planning', 3, NULL),
+('Attend an online course', 'Education', 4, NULL),
+('Spend 10 minutes on a language app', 'Education', 3, NULL),
+('Volunteer for an hour', 'Social', 4, NULL),
+('Write a letter to someone', 'Personal Development', 2, NULL),
+('Go grocery shopping', 'Household', 3, NULL),
+('Create a weekly meal plan', 'Health', 3, NULL),
+('Wash your car', 'Household', 3, NULL),
+('Do a digital detox for 1 hour', 'Wellbeing', 4, NULL),
+('Spend 30 minutes reading news', 'Education', 2, NULL),
+('Practice mindfulness for 10 minutes', 'Wellbeing', 3, NULL),
+('Do a 30-minute workout', 'Health', 4, NULL),
+('Update your financial budget', 'Planning', 4, NULL),
+('Check your bank account', 'Finance', 2, NULL),
+('Plan a workout routine', 'Health', 3, NULL),
+('Write a blog post', 'Productivity', 4, NULL),
+('Clear your email inbox', 'Productivity', 3, NULL),
+('Spend 30 minutes on a creative project', 'Personal Development', 3, NULL),
+('Write down your goals for the year', 'Personal Development', 5, NULL);
+
