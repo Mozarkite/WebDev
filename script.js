@@ -296,10 +296,22 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const q = document.getElementById('dbSearchInput').value.trim();
       loadDbTasks(q);
+      if (dbSearchForm) {
+  dbSearchForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const q = document.getElementById('dbSearchInput').value.trim();
+
+    if (q === "") {
+      loadDbTasks();        //show database tasks
+    } else {
+      loadDbTasks(q);       //show database tasks
+    }
+  });
+}
     });
   }
 
-  // initial load (public)
+  //initial load (public)
   loadDbTasks();
 
 });
