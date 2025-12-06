@@ -9,7 +9,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-<title>Toodoo</title>
+  <title>Toodoo</title>
 </head>
 <body class="bg-dark">
 
@@ -218,6 +218,41 @@
 </form>
 
 
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Create Tasks section of the web page -->
+  <div class="container-fluid d-none" id="create-tasks">
+    <div class="row gx-4 flex">
+      <div class="col-12 col-lg-5 mb-2 mb-lg-0">
+        <div class="bg-danger rounded-5 text-center p-5 mt-5 mx-2 d-flex flex-column align-items-center justify-content-center shadow-lg" style="border-radius: 5px; min-height: 50vh; min-width: 20vh;">
+          <h2 class="text-white fw-bold mb-4">Create Tasks</h2>
+
+          
+            <form id="createTaskForm">
+
+            <div class="form-group mt-2 text-light">
+              <label for="task-name">Task Description</label>
+              <input type="password" class="form-control" id="task-name" placeholder="Enter in task description">
+            </div>
+
+            <div class="form-group text-light">
+              <label for="task-category">Category</label>
+              <input type="email" class="form-control" id="task-category" placeholder="Enter in category">
+            </div>
+
+
+
+            <div class="form-group mt-2 text-light">
+              <label for="task-importance">Importance</label>
+              <input type="password" class="form-control" id="task-importance" placeholder="Enter in importance">
+            </div>
+
+            <button type="submit" class="btn btn-light mt-3">Create</button>
+            </form>
+          
         </div>
       </div>
     </div>
