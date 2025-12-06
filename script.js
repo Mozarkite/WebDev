@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         //if log in is succesful
         if (data.success) {
 
-          //stores the token nad user 
+          //stores the token and user 
           localStorage.setItem('token', data.token);
           localStorage.setItem('user', JSON.stringify(data.user));
 

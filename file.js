@@ -12,8 +12,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'replace_this_with_strong_secret';
 
 //Middleware
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(__dirname));
+app.use(express.urlencoded({ extended: true })); //Parses data from html forms
+app.use(express.static(__dirname)); //Manages images, files etc from the directory
 
 //Auth Helpers
 function generateToken(user) {
@@ -23,7 +23,7 @@ function generateToken(user) {
     JWT_SECRET,
     { expiresIn: '7d' }
   );
-}
+} //Auto generates a JWT token for the user
 
 function authMiddleware(req, res, next) {
 
@@ -32,7 +32,8 @@ function authMiddleware(req, res, next) {
   if (!authHeader) return res.status(401).json({ error: 'Missing Authorization header' });
 
   const parts = authHeader.split(' ');
-  if (parts.length !== 2 || parts[0] !== 'Bearer') return res.status(401).json({ error: 'Invalid Authorization header' });
+  //Checking if the first part is bearer, if not, give error
+  if (parts.length !== 2 || parts[0] !== 'Bearer') return res.status(401).json({ error: 'Invalid Authorization header' }); //Example token would look : "Bearer jwt-token"
 
   const token = parts[1];
   try {
@@ -46,6 +47,7 @@ function authMiddleware(req, res, next) {
 
 //Public Routes
 
+//Post Register
 app.post('/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
