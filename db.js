@@ -1,7 +1,8 @@
-// db.js
+//db.js
 const { Pool } = require('pg');
 require('dotenv').config();
 
+//Gets info from the environment file
 const pool = new Pool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
@@ -14,6 +15,7 @@ pool.on('connect', () => {
 
 });
 
+//Manages connection to database
 pool.query('SELECT NOW()', (err, res) => {
   if (err) {
     console.error('Error connecting to database:', err);
