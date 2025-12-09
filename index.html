@@ -9,11 +9,11 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-  <title>Toodoo</title>
+<title>Toodoo</title>
 </head>
 <body class="bg-dark">
 
-  <div class="container-fluid py-5" id = "home">
+  <div class="container-fluid py-5" id="home">
     <div class="row gx-4">
       <!-- Red container -->
       <div class="col-12 col-lg-7 mb-4 mb-lg-0">
@@ -46,7 +46,7 @@
         <div class="container-fluid">
           
           <!-- Brand -->
-          <a class="navbar-brand"><img src="Assets/logo.png" class="img-fluid" style="max-height: 10vh;" alt="Prod"></a>
+          <a class="navbar-brand" href="#" data-page="home"><img src="Assets/logo.png" class="img-fluid" style="max-height: 10vh;" alt="Prod"></a>
           
           <!-- Toggler button for mobile -->
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -69,8 +69,7 @@
                 <i class="fa fa-plus" aria-hidden="true"></i> Create Tasks
               </button>
 
-
-              <button type="button" class="btn btn-link nav-link link-light" data-page="favourite-tasks" style="font-size: larger;">
+              <button type="button" class="btn btn-link nav-link link-light" data-page="favourite" style="font-size: larger;">
                 <i class="fa fa-heart" aria-hidden="true"></i> Favourite Tasks
               </button>
             </div>
@@ -186,8 +185,10 @@
 
 <!-- profile section of the web page -->
   <div class="container-fluid d-none" id="profile">
-    <div class="row gx-4 flex">
-      <div class="col-12 col-lg-5 mb-2 mb-lg-0">
+    <div class="row gx-4 justify-content-end flex">
+
+
+      <div class="col-12 col-lg-4 mb-4 mb-lg-0">
         <div class="bg-danger rounded-5 text-center p-5 mt-5 mx-2 d-flex flex-column align-items-center justify-content-center" style="border-radius: 5px; min-height: 50vh; min-width: 20vh;">
           <img src="Assets/Guest-user.png" class="img-fluid rounded-circle" style="max-width: 100%; height: auto; max-height: 20vh;" alt="Profile Picture">
 
@@ -201,6 +202,8 @@
       </div>
     </div>
   </div>
+
+  
 
   <!-- Change section of the web page -->
   <div class="container-fluid d-none" id="change">
@@ -223,7 +226,7 @@
     </div>
   </div>
 
-<!-- Create Tasks section of the web page -->
+  <!-- Create Tasks section of the web page -->
   <div class="container-fluid d-none" id="create-tasks">
     <div class="row gx-4 flex">
       <div class="col-12 col-lg-5 mb-2 mb-lg-0">
@@ -233,21 +236,43 @@
           
             <form id="createTaskForm">
 
-            <div class="form-group mt-2 text-light">
+            <div class="form-group mt-4 text-light">
               <label for="task-name">Task Description</label>
-              <input type="password" class="form-control" id="task-name" placeholder="Enter in task description">
+              <input type="text" class="form-control" id="task-name" placeholder="Enter in task description">
             </div>
 
-            <div class="form-group text-light">
-              <label for="task-category">Category</label>
-              <input type="email" class="form-control" id="task-category" placeholder="Enter in category">
+            <div class="form-group mt-4 text-light">
+              <select class="form-select" aria-label="Default select example">
+                <option selected>Select Category</option>
+                <option value="1">Household</option>
+                <option value="2">Education</option>
+                <option value="3">Personal</option>
+                <option value="4">Health</option>
+                <option value="5">Productivity</option>
+                <option value="6">Planning</option>
+                <option value="7">Wellbeing</option>
+                <option value="8">Social</option>
+                <option value="9">Career</option>
+                <option value="10">Finance</option>
+              </select>
             </div>
 
 
 
-            <div class="form-group mt-2 text-light">
-              <label for="task-importance">Importance</label>
-              <input type="password" class="form-control" id="task-importance" placeholder="Enter in importance">
+            <div class="form-group mt-4 text-light">
+              <select class="form-select" aria-label="Default select example">
+                <option selected>Select Importance</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="3">4</option>
+                <option value="3">5</option>
+                <option value="3">6</option>
+                <option value="3">7</option>
+                <option value="3">8</option>
+                <option value="3">9</option>
+                <option value="3">10</option>
+              </select>
             </div>
 
             <button type="submit" class="btn btn-light mt-3">Create</button>
@@ -257,7 +282,6 @@
       </div>
     </div>
   </div>
-
 
 
   <!-- Loading Overlay -->
