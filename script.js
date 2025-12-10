@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const targetPage = e.currentTarget.getAttribute('data-page');
 
-    const protectedPages = ['create-tasks', 'favourite', ];
+    const protectedPages = ['create-tasks', 'favourite', 'profile'];
     if (protectedPages.includes(targetPage) && !isLoggedIn()) {
       requireLoginMessage();
       return;
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    const protectedPages = ['create-tasks', 'favourite']; // must match your page IDs
+    const protectedPages = ['create-tasks', 'favourite', 'profile']; // must match your page IDs
     if (protectedPages.includes(pageId) && !isLoggedIn()) {
       requireLoginMessage();
       // Optionally force them to home or login instead of the protected page:
