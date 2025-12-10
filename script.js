@@ -11,6 +11,14 @@ function authHeaders() {
   return token ? { 'Authorization': 'Bearer ' + token } : {};
 }
 
+function isLoggedIn() {
+  return !!getToken();
+}
+
+function requireLoginMessage() {
+  alert('You need to be logged in to access this feature.');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   console.log("DOM fully loaded");
 
@@ -24,19 +32,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
   //SPA navigation 
   buttons.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const targetPage = e.currentTarget.getAttribute('data-page');
+  btn.addEventListener('click', (e) => {
 
-      loader.classList.remove('d-none');
-      loader.classList.add('show');
+    e.preventDefault(); 
 
-      setTimeout(() => {
-        loader.classList.remove('show');
-        setTimeout(() => loader.classList.add('d-none'), 300);
-        showPage(targetPage);
-      }, 500);
-    });
+    const targetPage = e.currentTarget.getAttribute('data-page');
+
+    const protectedPages = ['create-tasks', 'favourite'];
+    if (protectedPages.includes(targetPage) && !isLoggedIn()) {
+      requireLoginMessage();
+      return;
+    }
+
+    loader.classList.remove('d-none');
+    loader.classList.add('show');
+
+    setTimeout(() => {
+      loader.classList.remove('show');
+      setTimeout(() => loader.classList.add('d-none'), 300);
+      showPage(targetPage);
+    }, 500);
   });
+});
 
   //Function used to show page ID
   function showPage(pageId) {
@@ -51,6 +68,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('popstate', (e) => {
     const pageId = e.state?.page || 'home';
+
+
+
+    const protectedPages = ['create-tasks', 'favourite']; // must match your page IDs
+    if (protectedPages.includes(pageId) && !isLoggedIn()) {
+      requireLoginMessage();
+      // Optionally force them to home or login instead of the protected page:
+      showPage('home');
+      return;
+    }
     showPage(pageId);
   });
 
@@ -124,6 +151,9 @@ document.addEventListener('DOMContentLoaded', () => {
           if (profileUser) profileUser.innerHTML = `Unique User ID - ${data.user.user_id}`;
 
           showPage('main');
+
+          updateGuestRestrictions();
+
         } else {
           alert("Error: " + data.error);
         }
@@ -237,6 +267,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       //redirects user
       showPage('login');
+
+      updateGuestRestrictions();
     });
   }
 
@@ -291,6 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/'/g, '&#39;');
   }
 
+
   if (dbSearchForm) {
     dbSearchForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -311,7 +344,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+
+document.addEventListener('click', (e) => {
+    const favBtn = e.target.closest('.favorite-btn');
+    if (!favBtn) return;
+
+    if (!isLoggedIn()) {
+      requireLoginMessage();
+      return;
+    }
+  });
+
+function updateGuestRestrictions() {
+    document.querySelectorAll('.requires-login').forEach(btn => {
+      btn.classList.toggle('disabled', !isLoggedIn());
+    });
+  }
+
   //initial load (public)
   loadDbTasks();
+
+  updateGuestRestrictions();
 
 });
