@@ -297,23 +297,39 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   //function to render the tasks
   function renderDbTasks(tasks) {
-    if (!dbTasksList) return;
-    if (!tasks || tasks.length === 0) {
-      dbTasksList.innerHTML = `<div class="p-2">No tasks found.</div>`;
-      return;
-    }
-
-    //Update the html
-
-    //showcases the task_name, category and important along with time limit (if applicable)
-    dbTasksList.innerHTML = tasks.map(t => `
-      <div class="db-task-item" style="padding:10px; border-bottom:1px solid #ddd;">
-        <div style="font-weight:600">${escapeHtml(t.task_name)}</div>
-        <div style="font-size:0.9rem">Category: ${escapeHtml(t.task_category)} — Importance: ${t.task_importance}</div>
-        ${t.task_time_limit ? `<div style="font-size:0.85rem; color:#666">Due: ${new Date(t.task_time_limit).toLocaleString()}</div>` : ''}
-      </div>
-    `).join('');
+  if (!dbTasksList) return;
+  if (!tasks || tasks.length === 0) {
+    dbTasksList.innerHTML = `<div class="p-2">No tasks found.</div>`;
+    return;
   }
+
+  dbTasksList.innerHTML = tasks.map(t => `
+    <div class="db-task-item" style="padding:10px; border-bottom:1px solid #ddd;">
+      <div style="font-weight:600">${escapeHtml(t.task_name)}</div>
+      <div style="font-size:0.9rem">
+        Category: ${escapeHtml(t.task_category)} — Importance: ${t.task_importance}
+      </div>
+      <button class="btn btn-sm btn-light mt-2 add-task-btn">Add</button>
+    </div>
+  `).join('');
+}
+
+
+
+  dbTasksList.addEventListener('click', (e) => {
+  const btn = e.target.closest('.add-task-btn');
+  if (!btn) return;
+
+  if (!isLoggedIn()) {
+    requireLoginMessage();
+    return;
+  }
+
+  btn.textContent = 'Completed';
+  btn.disabled = true;
+  btn.classList.remove('btn-light');
+  btn.classList.add('btn-success');
+});
 
   //Simple XSS helper
   function escapeHtml(str) {
