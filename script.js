@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const targetPage = e.currentTarget.getAttribute('data-page');
 
-    const protectedPages = ['create-tasks', 'favourite'];
+    const protectedPages = ['create-tasks', 'favourite', ];
     if (protectedPages.includes(targetPage) && !isLoggedIn()) {
       requireLoginMessage();
       return;
@@ -258,17 +258,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   //Logging out 
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      const welcomeHeader = document.getElementById('welcomeUser');
-      if (welcomeHeader) welcomeHeader.innerHTML = `Welcome <br> Guest`;
-      //removes the user and token from localstorage
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
+    logoutBtn.addEventListener('click', (e) => {
 
-      //redirects user
-      showPage('login');
+    if (!isLoggedIn()) {
+      requireLoginMessage();
+      return;
+    }
 
-      updateGuestRestrictions();
+    const welcomeHeader = document.getElementById('welcomeUser');
+    if (welcomeHeader) welcomeHeader.innerHTML = `Welcome <br> Guest`;
+
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    showPage('login');
+    updateGuestRestrictions();
     });
   }
 
