@@ -61,7 +61,6 @@ CREATE TABLE User_completed_tasks (
     FOREIGN KEY (todo_id) REFERENCES User_to_do_list(todo_id) ON DELETE CASCADE
 );
 
-
 INSERT INTO Db_tasks (task_name, task_category, task_importance, task_time_limit) VALUES
 ('Clean your room', 'Household', 2, NULL),
 ('Do your laundry', 'Household', 3, NULL),
@@ -103,5 +102,44 @@ INSERT INTO Db_tasks (task_name, task_category, task_importance, task_time_limit
 ('Write a blog post', 'Productivity', 4, NULL),
 ('Clear your email inbox', 'Productivity', 3, NULL),
 ('Spend 30 minutes on a creative project', 'Personal Development', 3, NULL),
-('Write down your goals for the year', 'Personal Development', 5, NULL);
+('Write down your goals for the year', 'Personal Development', 5, NULL),
+('Take notes for university lecture', 'Education', 8, NULL),
+('Review today’s lecture slides', 'Education', 7, NULL),
+('Revise notes from last week', 'Education', 7, NULL),
+('Complete university assignment draft', 'Education', 9, NULL),
+('Submit university assignment', 'Education', 10, NULL),
+('Study for upcoming exam', 'Education', 10, NULL),
+('Attend university lecture', 'Education', 9, NULL),
+('Prepare for group presentation', 'Education', 8, NULL),
+('Email professor regarding coursework', 'Education', 7, NULL),
+('Organize university notes and folders', 'Education', 6, NULL),
+('Pay monthly bills', 'Finance', 10, NULL),
+('Check bank account balances', 'Finance', 7, NULL),
+('Review monthly expenses', 'Finance', 8, NULL),
+('Update personal budget', 'Finance', 9, NULL),
+('Set or adjust savings goals', 'Finance', 8, NULL),
+('Apply for a job', 'Career', 9, NULL),
+('Prepare for job interview', 'Career', 10, NULL),
+('Practice interview questions', 'Career', 8, NULL),
+('Update CV and cover letter', 'Career', 9, NULL),
+('Update LinkedIn profile', 'Career', 7, NULL),
+('Back up important files', 'Productivity', 9, NULL),
+('Clear critical email backlog', 'Productivity', 7, NULL),
+('Create a daily task plan', 'Planning', 8, NULL),
+('Set priorities for today', 'Planning', 8, NULL),
+('Review long-term goals', 'Planning', 9, NULL),
+('Book doctor or dentist appointment', 'Health', 10, NULL),
+('Attend scheduled medical appointment', 'Health', 10, NULL),
+('Prepare healthy meals for the week', 'Health', 8, NULL),
+('Go to the gym or complete workout', 'Health', 7, NULL),
+('Ensure at least 8 hours of sleep', 'Health', 9, NULL),
+('Clean bathroom thoroughly', 'Household', 7, NULL),
+('Do weekly house cleaning', 'Household', 6, NULL),
+('Take out trash and recycling', 'Household', 5, NULL),
+('Respond to urgent messages', 'Social', 8, NULL),
+('Schedule time with close family', 'Social', 7, NULL),
+('Reflect on academic or career progress', 'Personal Development', 7, NULL),
+('Read mandatory course material', 'Personal Development', 8, NULL);
+
+
 
