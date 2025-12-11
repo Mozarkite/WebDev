@@ -172,6 +172,67 @@ app.post('/delete-account', authMiddleware, async (req, res) => {
   }
 });
 
+app.post('/add-db-task', authMiddleware, async (req, res) => {
+  try {
+    const { task_id } = req.body;
+
+    if (!task_id) {
+      return res.json({ success: false, error: 'task_id required' });
+    }
+
+    const taskResult = await pool.query(`
+      SELECT task_id, task_name, task_category, task_importance, task_time_limit
+      FROM Db_tasks
+      WHERE task_id = $1
+    `, [task_id]);
+
+    if (taskResult.rows.length === 0) {
+      return res.json({ success: false, error: 'Task not found' });
+    }
+
+    const t = taskResult.rows[0];
+
+    const insertResult = await pool.query(`
+      INSERT INTO User_to_do_list
+        (user_id, db_task_id, task_name, task_category, task_importance, task_time_limit)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *
+    `, [
+      req.user.user_id,
+      t.task_id,
+      t.task_name,
+      t.task_category,
+      t.task_importance,
+      t.task_time_limit
+    ]);
+
+    res.json({ success: true, todo: insertResult.rows[0] });
+
+  } catch (err) {
+    console.error('Add DB task error:', err);
+    res.json({ success: false, error: 'Server error' });
+  }
+});
+
+app.get('/my-tasks', authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT *
+      FROM User_to_do_list
+      WHERE user_id = $1
+      ORDER BY added_at DESC
+    `, [req.user.user_id]);
+
+    res.json({ success: true, tasks: result.rows });
+
+  } catch (err) {
+    console.error('Load user tasks error:', err);
+    res.json({ success: false, error: 'Server error' });
+  }
+});
+
+
+
 
 //Fallback to index.html for SPA routes
 app.get(/.*/, (req, res) => {
