@@ -154,6 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
           updateGuestRestrictions();
 
+          loadUserTasks(); // ADDED
+
         } else {
           alert("Error: " + data.error);
         }
@@ -309,14 +311,14 @@ document.addEventListener('DOMContentLoaded', () => {
       <div style="font-size:0.9rem">
         Category: ${escapeHtml(t.task_category)} — Importance: ${t.task_importance}
       </div>
-      <button class="btn btn-sm btn-light mt-2 add-task-btn">Add</button>
+      <button class="btn btn-sm btn-light mt-2 add-task-btn" data-task-id="${t.task_id}">Add</button>
     </div>
   `).join('');
 }
 
 
 
-  dbTasksList.addEventListener('click', (e) => {
+  dbTasksList.addEventListener('click', async (e) => {
   const btn = e.target.closest('.add-task-btn');
   if (!btn) return;
 
@@ -325,10 +327,23 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  btn.textContent = 'Completed';
-  btn.disabled = true;
-  btn.classList.remove('btn-light');
-  btn.classList.add('btn-success');
+  const taskId = btn.getAttribute("data-task-id");
+
+  const res = await fetch("/add-db-task", {
+    method: "POST",
+    headers: Object.assign({ "Content-Type": "application/json" }, authHeaders()),
+    body: JSON.stringify({ task_id: taskId })
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    btn.textContent = 'Added';
+    btn.disabled = true;
+    btn.classList.remove('btn-light');
+    btn.classList.add('btn-success');
+    loadUserTasks();
+  }
 });
 
   //Simple XSS helper
@@ -379,6 +394,29 @@ function updateGuestRestrictions() {
       btn.classList.toggle('disabled', !isLoggedIn());
     });
   }
+
+
+async function loadUserTasks() {
+  const list = document.getElementById("userTaskList");
+  if (!list) return;
+
+  const res = await fetch("/my-tasks", {
+    headers: authHeaders()
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    list.innerHTML = data.tasks.map(t => `
+      <div class="p-2 border-bottom text-white">
+        <strong>${t.task_name}</strong><br>
+        Category: ${t.task_category}<br>
+        Importance: ${t.task_importance}
+      </div>
+    `).join("");
+  }
+}
+
 
   //initial load (public)
   loadDbTasks();
