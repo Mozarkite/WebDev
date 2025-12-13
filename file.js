@@ -278,18 +278,22 @@ app.post('/complete-task', authMiddleware, async (req, res) => {
 
 app.get('/user-tasks', authMiddleware, async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT *
-      FROM User_tasks
-      WHERE user_id = $1
-    `, [req.user.user_id]);
+    const result = await pool.query(
+      `SELECT *
+       FROM User_to_do_list
+       WHERE user_id = $1
+       ORDER BY added_at DESC`,
+      [req.user.user_id]
+    );
 
-    res.json({ success: true, tasks: result.rows });
+    return res.json({ success: true, tasks: result.rows });
+
   } catch (err) {
     console.error('Get user tasks error:', err);
-    res.status(500).json({ success: false, error: 'Server error' });
+    return res.status(500).json({ success: false, error: 'Server error' });
   }
 });
+
 
 app.post('/create-user-task', authMiddleware, async (req, res) => {
   try {
@@ -362,6 +366,49 @@ app.get('/task-category-distribution', authMiddleware, async (req, res) => {
     res.status(500).json({ success: false, error: 'Server error' });
   }
 });
+
+app.post("/favourite", authMiddleware, async (req, res) => {
+  try {
+    const { task_id, type } = req.body;
+
+    if (!task_id || type !== "user")
+      return res.json({ success: false, error: "Invalid favourite request" });
+
+    await pool.query(
+      `INSERT INTO User_favourited_tasks (user_id, user_task_id)
+       VALUES ($1, $2)
+       ON CONFLICT DO NOTHING`,
+      [req.user.user_id, task_id]
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Favourite error:", err);
+    res.json({ success: false, error: "Server error" });
+  }
+});
+
+app.post("/unfavourite", authMiddleware, async (req, res) => {
+  try {
+    const { task_id, type } = req.body;
+
+    if (!task_id || type !== "user")
+      return res.json({ success: false, error: "Invalid unfavourite request" });
+
+    await pool.query(
+      `DELETE FROM User_favourited_tasks
+       WHERE user_id = $1 AND user_task_id = $2`,
+      [req.user.user_id, task_id]
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Unfavourite error:", err);
+    res.json({ success: false, error: "Server error" });
+  }
+});
+
+
 
 
 
