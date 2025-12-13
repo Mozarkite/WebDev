@@ -52,19 +52,31 @@ if (protectedPages.includes(initialPage) && !isLoggedIn()) {
   showPage(initialPage);
 }
 
-
-document.addEventListener("click", (e) => {
+document.addEventListener("click", async (e) => {
   const heart = e.target.closest(".favorite-heart");
   if (!heart) return;
 
   if (!isLoggedIn()) {
-    requireLoginMessage();
-    return;
+    return requireLoginMessage();
   }
 
-  // toggle red/gray
+  const taskId = heart.getAttribute("data-history-id");
+
+  // Toggle UI color
   const isRed = heart.style.color === "red";
   heart.style.color = isRed ? "gray" : "red";
+
+  // Choose backend route
+  const route = isRed ? "/unfavourite" : "/favourite";
+
+  await fetch(route, {
+    method: "POST",
+    headers: Object.assign({ "Content-Type": "application/json" }, authHeaders()),
+    body: JSON.stringify({
+      task_id: taskId,
+      type: "user"   // tells backend it's a user-created task
+    })
+  });
 });
 
 
@@ -565,9 +577,6 @@ async function loadTaskHistory() {
 
   </div>
 `).join('');
-
-
-
 
 }
 
