@@ -252,6 +252,45 @@ app.get('/my-tasks', authMiddleware, async (req, res) => {
   }
 });
 
+app.post('/complete-task', authMiddleware, async (req, res) => {
+  try {
+    const { task_id } = req.body; //expects task_id from front-end
+    if (!task_id) return res.json({ success: false, error: 'task_id required' });
+
+    //Update only if the task belongs to the logged-in user
+    const result = await pool.query(`
+      UPDATE User_to_do_list
+      SET completed = TRUE
+      WHERE todo_id = $1 AND user_id = $2
+      RETURNING *;
+    `, [task_id, req.user.user_id]); 
+
+    if (result.rows.length === 0) {
+      return res.json({ success: false, error: 'Task not found or not yours' });
+    }
+
+    res.json({ success: true, task: result.rows[0] });
+  } catch (err) {
+    console.error('Complete task error:', err);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+app.get('/user-tasks', authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT *
+      FROM User_tasks
+      WHERE user_id = $1
+    `, [req.user.user_id]);
+
+    res.json({ success: true, tasks: result.rows });
+  } catch (err) {
+    console.error('Get user tasks error:', err);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
 app.post('/create-user-task', authMiddleware, async (req, res) => {
   try {
     const {

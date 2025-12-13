@@ -19,38 +19,7 @@ function requireLoginMessage() {
   alert('You need to be logged in to access this feature.');
 }
 
-async function loadTaskHistory() {
-  const list = document.getElementById('taskHistoryList');
-  if (!list) return;
 
-  const res = await fetch('/my-tasks', {
-    headers: authHeaders()
-  });
-
-  const data = await res.json();
-
-  if (!data.success || data.tasks.length === 0) {
-    list.innerHTML = '<div>No tasks created yet.</div>';
-    return;
-  }
-
-  const userTasks = data.tasks.filter(t => t.is_user_task);
-
-  if (userTasks.length === 0) {
-    list.innerHTML = '<div>No tasks created yet.</div>';
-    return;
-  }
-
-  list.innerHTML = userTasks.map(t => `
-    <div class="mb-2 p-2 rounded bg-dark">
-      <strong>${escapeHtml(t.task_name)}</strong><br>
-      <small>
-        ${escapeHtml(t.task_category)} |
-        Importance: ${t.task_importance}
-      </small>
-    </div>
-  `).join('');
-}
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -195,6 +164,7 @@ if (protectedPages.includes(initialPage) && !isLoggedIn()) {
           updateGuestRestrictions();
 
           loadTaskHistory();
+          loadUserTasks();
 
         } else {
           alert("Error: " + data.error);
@@ -298,14 +268,19 @@ if (protectedPages.includes(initialPage) && !isLoggedIn()) {
     });
   }
 
-  //Logging out 
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', (e) => {
-
+  logoutBtn.addEventListener('click', (e) => {
     if (!isLoggedIn()) {
       requireLoginMessage();
       return;
     }
+
+    // Clear the task lists
+    const userTaskList = document.getElementById('userTaskList');
+    if (userTaskList) userTaskList.innerHTML = '';
+
+    const taskHistoryList = document.getElementById('taskHistoryList');
+    if (taskHistoryList) taskHistoryList.innerHTML = '';
 
     const welcomeHeader = document.getElementById('welcomeUser');
     if (welcomeHeader) welcomeHeader.innerHTML = `Welcome <br> Guest`;
@@ -314,8 +289,8 @@ if (protectedPages.includes(initialPage) && !isLoggedIn()) {
     localStorage.removeItem('token');
     showPage('login');
     updateGuestRestrictions();
-    });
-  }
+  });
+}
 
   //Database view + scrollable view
   const dbSearchForm = document.getElementById('dbTasksSearchForm');
@@ -460,28 +435,101 @@ function updateGuestRestrictions() {
   });
   }
 
+async function loadTaskHistory() {
+  const list = document.getElementById('taskHistoryList');
+  if (!list) return;
+
+  const res = await fetch('/user-tasks', { headers: authHeaders() });
+  const data = await res.json();
+
+  if (!data.success || data.tasks.length === 0) {
+    list.innerHTML = '<div>No tasks created yet.</div>';
+    return;
+  }
+
+  //Use the correct primary key column from User_tasks table
+  const userTasks = data.tasks; //no filtering
+
+  list.innerHTML = userTasks.map(t => `
+    <div class="mb-2 p-2 rounded bg-dark">
+      <strong>${escapeHtml(t.task_name)}</strong><br>
+      <small>
+        ${escapeHtml(t.task_category)} |
+        Importance: ${t.task_importance}
+      </small>
+    </div>
+  `).join('');
+
+
+
+}
+
 
 async function loadUserTasks() {
   const list = document.getElementById("userTaskList");
   if (!list) return;
 
-  const res = await fetch("/my-tasks", {
-    headers: authHeaders()
-  });
-
+  const res = await fetch("/my-tasks", { headers: authHeaders() });
   const data = await res.json();
 
   if (data.success) {
-    list.innerHTML = data.tasks.map(t => `
-      <div class="p-2 border-bottom text-white">
-        <strong>${t.task_name}</strong><br>
-        Category: ${t.task_category}<br>
-        Importance: ${t.task_importance}
-      </div>
-    `).join("");
+    list.innerHTML = data.tasks.map(t => {
+      const isCompleted = t.completed; // <--- check completed status
+      return `
+        <div class="p-2 border-bottom text-white d-flex justify-content-between align-items-center">
+          <div>
+            <strong>${escapeHtml(t.task_name)}</strong><br>
+            Category: ${escapeHtml(t.task_category)}<br>
+            Importance: ${t.task_importance}
+          </div>
+          <button class="complete-task-btn btn btn-sm mt-1 ${isCompleted ? 'btn-secondary' : 'btn-success'}" 
+                  data-todo-id="${t.todo_id}" 
+                  ${isCompleted ? 'disabled' : ''}>
+            ${isCompleted ? 'Completed' : 'Complete'}
+          </button>
+        </div>
+      `;
+    }).join("");
   }
 }
+
+document.getElementById("userTaskList")?.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".complete-task-btn");
+  if (!btn) return;
+
+  if (!isLoggedIn()) {
+    requireLoginMessage();
+    return;
+  }
+
+  const taskId = btn.getAttribute("data-todo-id");
+
+  try {
+    const res = await fetch("/complete-task", {
+      method: "POST",
+      headers: Object.assign({ "Content-Type": "application/json" }, authHeaders()),
+      body: JSON.stringify({ task_id: taskId })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      btn.textContent = "Completed";
+      btn.disabled = true;
+      btn.classList.remove("btn-success");
+      btn.classList.add("btn-secondary");
+    } else {
+      alert(data.error || "Could not complete task");
+    }
+  } catch (err) {
+    console.error("Complete task error:", err);
+    alert("Server error");
+  }
+});
+
+
 const createTaskForm = document.getElementById('createTaskForm');
+loadTaskHistory()
 
 createTaskForm.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -520,6 +568,10 @@ createTaskForm.addEventListener('submit', async (e) => {
 
     createTaskForm.reset();
     alert('Task created successfully');
+    loadTaskHistory();
+    loadUserTasks();
+
+  
 
   } catch (err) {
     console.error(err);
@@ -528,10 +580,14 @@ createTaskForm.addEventListener('submit', async (e) => {
 });
 
 
+  if (isLoggedIn()) {
+  loadTaskHistory();
+  loadUserTasks();
+}
+
 
   //initial load (public)
   loadDbTasks();
-
   updateGuestRestrictions();
 
 });
