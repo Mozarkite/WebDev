@@ -155,20 +155,41 @@ app.post('/update-username', authMiddleware, async (req, res) => {
   }
 });
 
-//Delete account for logged-in user
 app.post('/delete-account', authMiddleware, async (req, res) => {
+  const client = await pool.connect();
+
   try {
-    const query = `DELETE FROM Users WHERE user_id = $1 RETURNING user_id`;
-    const result = await pool.query(query, [req.user.user_id]);
+    await client.query('BEGIN');
+
+    await client.query(
+      `DELETE FROM User_to_do_list WHERE user_id = $1`,
+      [req.user.user_id]
+    );
+
+    await client.query(
+      `DELETE FROM User_tasks WHERE user_id = $1`,
+      [req.user.user_id]
+    );
+
+    const result = await client.query(
+      `DELETE FROM Users WHERE user_id = $1`,
+      [req.user.user_id]
+    );
 
     if (result.rowCount === 0) {
+      await client.query('ROLLBACK');
       return res.json({ success: false, error: 'User not found' });
     }
 
+    await client.query('COMMIT');
     res.json({ success: true });
+
   } catch (err) {
+    await client.query('ROLLBACK');
     console.error('Delete account error:', err);
     res.status(500).json({ success: false, error: 'Server error' });
+  } finally {
+    client.release();
   }
 });
 
