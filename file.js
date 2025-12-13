@@ -347,6 +347,21 @@ app.post('/create-user-task', authMiddleware, async (req, res) => {
   }
 });
 
+app.get('/task-category-distribution', authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT task_category, COUNT(*) AS count
+      FROM User_to_do_list
+      WHERE user_id = $1
+      GROUP BY task_category
+    `, [req.user.user_id]);
+
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    console.error('Category distribution error:', err);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
 
 
 

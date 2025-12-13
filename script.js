@@ -1,4 +1,4 @@
-// script.js 
+//script.js 
 console.log('Script loaded');
 
 //helper: get token
@@ -20,6 +20,11 @@ function requireLoginMessage() {
 }
 
 
+/*
+-----------------------------------------------------------
+DOM CONTENT LOADER
+-----------------------------------------------------------
+*/
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -47,7 +52,14 @@ if (protectedPages.includes(initialPage) && !isLoggedIn()) {
   showPage(initialPage);
 }
 
-  //SPA navigation 
+
+/*
+-----------------------------------------------------------
+SPA navigation for pages
+-----------------------------------------------------------
+*/
+
+
   buttons.forEach(btn => {
   btn.addEventListener('click', (e) => {
 
@@ -72,7 +84,15 @@ if (protectedPages.includes(initialPage) && !isLoggedIn()) {
   });
 });
 
-  function showPage(pageId) {
+
+
+/*
+-----------------------------------------------------------
+Show page function
+-----------------------------------------------------------
+*/
+
+ function showPage(pageId) {
   const protectedPages = ['create-tasks', 'favourite', 'profile'];
 
   if (protectedPages.includes(pageId) && !isLoggedIn()) {
@@ -88,8 +108,21 @@ if (protectedPages.includes(initialPage) && !isLoggedIn()) {
   const nav = document.getElementById('mainNav');
   if (pageId === 'home') nav.classList.add('d-none');
   else nav.classList.remove('d-none');
+
+  
+  if (pageId === 'favourite') {
+    loadCategoryChart(); //draw the pie chart when favourites page loads
+  }
 }
 
+
+
+
+/*
+-----------------------------------------------------------
+Create Account Section
+-----------------------------------------------------------
+*/
   //Account creation
   if (createForm) {
     createForm.addEventListener('submit', async (e) => {
@@ -126,6 +159,13 @@ if (protectedPages.includes(initialPage) && !isLoggedIn()) {
     });
   }
 
+
+
+  /*
+-----------------------------------------------------------
+Logging into Account
+-----------------------------------------------------------
+*/
   //Account log in
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
@@ -177,6 +217,13 @@ if (protectedPages.includes(initialPage) && !isLoggedIn()) {
     });
   }
 
+
+
+/*
+-----------------------------------------------------------
+Updating Profile Section
+-----------------------------------------------------------
+*/
   //Updating username
   const changeForm = document.getElementById('changeUsernameForm');
   if (changeForm) {
@@ -232,7 +279,6 @@ if (protectedPages.includes(initialPage) && !isLoggedIn()) {
     });
   }
 
-  
   //Delete account (protected)
   if (deleteBtn) {
     deleteBtn.addEventListener('click', async () => {
@@ -268,6 +314,13 @@ if (protectedPages.includes(initialPage) && !isLoggedIn()) {
     });
   }
 
+
+
+/*
+-----------------------------------------------------------
+Clearing user and lists
+-----------------------------------------------------------
+*/
   if (logoutBtn) {
   logoutBtn.addEventListener('click', (e) => {
     if (!isLoggedIn()) {
@@ -292,6 +345,13 @@ if (protectedPages.includes(initialPage) && !isLoggedIn()) {
   });
 }
 
+
+
+/*
+-----------------------------------------------------------
+Database view section
+-----------------------------------------------------------
+*/
   //Database view + scrollable view
   const dbSearchForm = document.getElementById('dbTasksSearchForm');
   const dbTasksList = document.getElementById('dbTasksList');
@@ -331,8 +391,6 @@ if (protectedPages.includes(initialPage) && !isLoggedIn()) {
   `).join('');
 }
 
-
-
   dbTasksList.addEventListener('click', async (e) => {
   const btn = e.target.closest('.add-task-btn');
   if (!btn) return;
@@ -361,7 +419,13 @@ if (protectedPages.includes(initialPage) && !isLoggedIn()) {
   }
 });
 
-  //Simple XSS helper
+
+
+/*
+-----------------------------------------------------------
+XSS helpers for HTML
+-----------------------------------------------------------
+*/
   function escapeHtml(str) {
     if (!str) return '';
     return String(str)
@@ -372,6 +436,14 @@ if (protectedPages.includes(initialPage) && !isLoggedIn()) {
       .replace(/'/g, '&#39;');
   }
 
+
+
+
+/*
+-----------------------------------------------------------
+Session Restore on Page Reload
+-----------------------------------------------------------
+*/
   function restoreSession() {
   const userJSON = localStorage.getItem('user');
   if (!userJSON) return;
@@ -415,7 +487,6 @@ if (protectedPages.includes(initialPage) && !isLoggedIn()) {
     });
   }
 
-
 document.addEventListener('click', (e) => {
     const favBtn = e.target.closest('.favorite-btn');
     if (!favBtn) return;
@@ -435,6 +506,15 @@ function updateGuestRestrictions() {
   });
   }
 
+
+
+
+
+/*
+-----------------------------------------------------------
+User Task History & Active Tasks
+-----------------------------------------------------------
+*/
 async function loadTaskHistory() {
   const list = document.getElementById('taskHistoryList');
   if (!list) return;
@@ -464,7 +544,6 @@ async function loadTaskHistory() {
 
 }
 
-
 async function loadUserTasks() {
   const list = document.getElementById("userTaskList");
   if (!list) return;
@@ -493,6 +572,14 @@ async function loadUserTasks() {
   }
 }
 
+
+
+
+/*
+-----------------------------------------------------------
+Completion button for tasks
+-----------------------------------------------------------
+*/
 document.getElementById("userTaskList")?.addEventListener("click", async (e) => {
   const btn = e.target.closest(".complete-task-btn");
   if (!btn) return;
@@ -528,6 +615,13 @@ document.getElementById("userTaskList")?.addEventListener("click", async (e) => 
 });
 
 
+
+
+/*
+-----------------------------------------------------------
+Creating Tasks and protection
+-----------------------------------------------------------
+*/
 const createTaskForm = document.getElementById('createTaskForm');
 loadTaskHistory()
 
