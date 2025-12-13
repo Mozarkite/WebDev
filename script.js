@@ -53,6 +53,22 @@ if (protectedPages.includes(initialPage) && !isLoggedIn()) {
 }
 
 
+document.addEventListener("click", (e) => {
+  const heart = e.target.closest(".favorite-heart");
+  if (!heart) return;
+
+  if (!isLoggedIn()) {
+    requireLoginMessage();
+    return;
+  }
+
+  // toggle red/gray
+  const isRed = heart.style.color === "red";
+  heart.style.color = isRed ? "gray" : "red";
+});
+
+
+
 /*
 -----------------------------------------------------------
 SPA navigation for pages
@@ -531,14 +547,25 @@ async function loadTaskHistory() {
   const userTasks = data.tasks; //no filtering
 
   list.innerHTML = userTasks.map(t => `
-    <div class="mb-2 p-2 rounded bg-dark">
+  <div class="mb-2 p-2 rounded bg-dark d-flex justify-content-between align-items-center">
+
+    <div>
       <strong>${escapeHtml(t.task_name)}</strong><br>
       <small>
         ${escapeHtml(t.task_category)} |
         Importance: ${t.task_importance}
       </small>
     </div>
-  `).join('');
+
+    <!-- ADDED: Heart icon -->
+    <i class="fa fa-heart favorite-heart"
+       data-history-id="${t.user_task_id || t.todo_id || t.id}"
+       style="cursor:pointer; font-size:1.5rem; color:gray;">
+    </i>
+
+  </div>
+`).join('');
+
 
 
 
