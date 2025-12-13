@@ -3,6 +3,8 @@ drop table if exists Db_tasks Cascade;
 drop table if exists User_tasks Cascade;
 drop table if exists User_to_do_list Cascade;
 drop table if exists user_completed_tasks Cascade;
+drop table if exists User_favourited_tasks cascade;
+
 
 -- Users table
 CREATE TABLE Users (
@@ -59,6 +61,29 @@ CREATE TABLE User_completed_tasks (
     completed_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (todo_id) REFERENCES User_to_do_list(todo_id) ON DELETE CASCADE
+);
+
+--Favourited tasks table
+CREATE TABLE User_favourited_tasks (
+    favourite_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    user_task_id INT,
+    db_task_id INT,
+    favourited_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_task_id) REFERENCES User_tasks(task_id) ON DELETE CASCADE,
+    FOREIGN KEY (db_task_id) REFERENCES Db_tasks(task_id) ON DELETE CASCADE,
+
+    --Ensure exactly one type of task is favourited
+    CHECK (
+        (user_task_id IS NOT NULL AND db_task_id IS NULL) OR
+        (user_task_id IS NULL AND db_task_id IS NOT NULL)
+    ),
+
+    --Prevent duplicate favourites
+    UNIQUE (user_id, user_task_id),
+    UNIQUE (user_id, db_task_id)
 );
 
 INSERT INTO Db_tasks (task_name, task_category, task_importance, task_time_limit) VALUES
