@@ -166,5 +166,7 @@ INSERT INTO Db_tasks (task_name, task_category, task_importance, task_time_limit
 ('Reflect on academic or career progress', 'Personal Development', 7, NULL),
 ('Read mandatory course material', 'Personal Development', 8, NULL);
 
+ALTER TABLE User_to_do_list ADD COLUMN completed BOOLEAN DEFAULT FALSE;
+
 
 
