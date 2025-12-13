@@ -19,6 +19,36 @@ function requireLoginMessage() {
   alert('You need to be logged in to access this feature.');
 }
 
+async function loadMyTasks() {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+
+  const res = await fetch('/my-tasks', {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  const data = await res.json();
+  const list = document.getElementById('userTaskList');
+
+  list.innerHTML = '';
+
+  if (!data.success || data.tasks.length === 0) {
+    list.innerHTML = '<div>No tasks yet.</div>';
+    return;
+  }
+
+  data.tasks.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'mb-2 p-2 rounded bg-dark';
+    div.innerHTML = `
+      <strong>${t.task_name}</strong><br>
+      <small>${t.task_category} | Importance: ${t.task_importance}</small>
+    `;
+    list.appendChild(div);
+  });
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
   console.log("DOM fully loaded");
 
@@ -154,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           updateGuestRestrictions();
 
-          loadUserTasks(); // ADDED
+          loadUserTasks(); 
 
         } else {
           alert("Error: " + data.error);
@@ -416,6 +446,53 @@ async function loadUserTasks() {
     `).join("");
   }
 }
+const createTaskForm = document.getElementById('createTaskForm');
+
+createTaskForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const token = localStorage.getItem('token');
+  if (!token) {
+    alert('You must be logged in');
+    return;
+  }
+
+  const data = {
+    task_name: document.getElementById('taskName').value.trim(),
+    task_category: document.getElementById('taskCategory').value,
+    task_importance: parseInt(document.getElementById('taskImportance').value),
+    task_time_limit: null
+  };
+
+  try {
+    const res = await fetch('/create-user-task', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+    if (!result.success) {
+      alert(result.error || 'Failed to create task');
+      return;
+    }
+
+    // Optional: refresh user's task list
+    loadMyTasks();
+
+    createTaskForm.reset();
+    alert('Task created successfully');
+
+  } catch (err) {
+    console.error(err);
+    alert('Server error');
+  }
+});
+
 
 
   //initial load (public)
