@@ -65,11 +65,11 @@
                 <i class="fa fa-user-plus" aria-hidden="true"></i> Log In
               </button>
 
-              <button type="button" class="btn btn-link nav-link link-light" data-page="create-tasks" style="font-size: larger;">
+              <button type="button" class="btn btn-link nav-link link-light requires-login" data-page="create-tasks" style="font-size: larger;">
                 <i class="fa fa-plus" aria-hidden="true"></i> Create Tasks
               </button>
 
-              <button type="button" class="btn btn-link nav-link link-light" data-page="favourite" style="font-size: larger;">
+              <button type="button" class="btn btn-link nav-link link-light requires-login" data-page="favourite" style="font-size: larger;">
                 <i class="fa fa-heart" aria-hidden="true"></i> Favourite Tasks
               </button>
             </div>
@@ -84,8 +84,8 @@
           <div class="bg-danger rounded-5 text-center p-5 mt-5 mx-2 d-flex flex-column align-items-center justify-content-start shadow-lg" style="border-radius: 5px; min-height: 50vh; min-width: 20vh;">
             <h2 id="welcomeUser" class="text-white fw-bold mb-4">Welcome <br> Guest</h2>
             <img src="Assets/Guest-user.png" class="img-fluid rounded-circle" style="max-width: 100%; height: auto; max-height: 20vh;" alt="Profile Picture">
-            <button type="button" class="btn btn-light mt-2" data-page="profile">Profile</button>
-            <button type="button" class="btn btn-light mt-2" id="logoutBtn">Log Out</button>
+            <button type="button" class="btn btn-light mt-2 requires-login" data-page="profile">Profile</button>
+            <button type="button" class="btn btn-light mt-2 requires-login" id="logoutBtn">Log Out</button>
           </div>
         </div>
 
@@ -319,6 +319,19 @@
       <div class="col-12 col-lg-3 mb-3 mb-lg-0">
         <div class="bg-danger rounded-5 text-center p-5 mt-5 mx-2 d-flex flex-column align-items-center" style="border-radius: 5px; min-height: 70vh; min-width: 20vh;">
         <h2 class="text-white fw-bold mb-4">Task History</h2>
+
+        <div id="taskHistoryList"
+            class="w-100"
+            style="
+              max-height: 45vh;
+              overflow-y: auto;
+              background: rgba(255,255,255,0.1);
+              border-radius: 10px;
+              padding: 10px;
+              color: white;
+            ">
+          <div>No tasks created yet.</div>
+        </div>
           
 
         </div>
