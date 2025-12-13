@@ -19,33 +19,37 @@ function requireLoginMessage() {
   alert('You need to be logged in to access this feature.');
 }
 
-async function loadMyTasks() {
-  const token = localStorage.getItem('token');
-  if (!token) return;
+async function loadTaskHistory() {
+  const list = document.getElementById('taskHistoryList');
+  if (!list) return;
 
   const res = await fetch('/my-tasks', {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: authHeaders()
   });
 
   const data = await res.json();
-  const list = document.getElementById('userTaskList');
-
-  list.innerHTML = '';
 
   if (!data.success || data.tasks.length === 0) {
-    list.innerHTML = '<div>No tasks yet.</div>';
+    list.innerHTML = '<div>No tasks created yet.</div>';
     return;
   }
 
-  data.tasks.forEach(t => {
-    const div = document.createElement('div');
-    div.className = 'mb-2 p-2 rounded bg-dark';
-    div.innerHTML = `
-      <strong>${t.task_name}</strong><br>
-      <small>${t.task_category} | Importance: ${t.task_importance}</small>
-    `;
-    list.appendChild(div);
-  });
+  const userTasks = data.tasks.filter(t => t.is_user_task);
+
+  if (userTasks.length === 0) {
+    list.innerHTML = '<div>No tasks created yet.</div>';
+    return;
+  }
+
+  list.innerHTML = userTasks.map(t => `
+    <div class="mb-2 p-2 rounded bg-dark">
+      <strong>${escapeHtml(t.task_name)}</strong><br>
+      <small>
+        ${escapeHtml(t.task_category)} |
+        Importance: ${t.task_importance}
+      </small>
+    </div>
+  `).join('');
 }
 
 
@@ -59,6 +63,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('loginForm');
   const logoutBtn = document.getElementById('logoutBtn');
   const deleteBtn = document.getElementById('deleteAccountBtn');
+
+  restoreSession();
+  updateGuestRestrictions();
+
+  const initialPage = location.pathname.replace('/', '') || 'home';
+
+const protectedPages = ['create-tasks', 'favourite', 'profile'];
+
+if (protectedPages.includes(initialPage) && !isLoggedIn()) {
+  requireLoginMessage();
+  showPage('home');
+} else {
+  showPage(initialPage);
+}
 
   //SPA navigation 
   buttons.forEach(btn => {
@@ -85,31 +103,23 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-  //Function used to show page ID
   function showPage(pageId) {
-    const pages = document.querySelectorAll('.container-fluid[id]');
-    pages.forEach(p => p.classList.toggle('d-none', p.id !== pageId));
-    history.pushState({ page: pageId }, '', pageId);
+  const protectedPages = ['create-tasks', 'favourite', 'profile'];
 
-    const nav = document.getElementById('mainNav');
-    if (pageId === 'home') nav.classList.add('d-none');
-    else nav.classList.remove('d-none');
+  if (protectedPages.includes(pageId) && !isLoggedIn()) {
+    requireLoginMessage();
+    pageId = 'home';
   }
 
-  window.addEventListener('popstate', (e) => {
-    const pageId = e.state?.page || 'home';
+  const pages = document.querySelectorAll('.container-fluid[id]');
+  pages.forEach(p => p.classList.toggle('d-none', p.id !== pageId));
 
+  history.pushState({ page: pageId }, '', pageId);
 
-
-    const protectedPages = ['create-tasks', 'favourite', 'profile']; // must match your page IDs
-    if (protectedPages.includes(pageId) && !isLoggedIn()) {
-      requireLoginMessage();
-      // Optionally force them to home or login instead of the protected page:
-      showPage('home');
-      return;
-    }
-    showPage(pageId);
-  });
+  const nav = document.getElementById('mainNav');
+  if (pageId === 'home') nav.classList.add('d-none');
+  else nav.classList.remove('d-none');
+}
 
   //Account creation
   if (createForm) {
@@ -184,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           updateGuestRestrictions();
 
-          loadUserTasks(); 
+          loadTaskHistory();
 
         } else {
           alert("Error: " + data.error);
@@ -387,6 +397,28 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/'/g, '&#39;');
   }
 
+  function restoreSession() {
+  const userJSON = localStorage.getItem('user');
+  if (!userJSON) return;
+
+  const user = JSON.parse(userJSON);
+
+  const welcomeHeader = document.getElementById('welcomeUser');
+  if (welcomeHeader) {
+    welcomeHeader.innerHTML = `Welcome <br> ${user.username}`;
+  }
+
+  const profileHeader = document.getElementById('profileUsername');
+  if (profileHeader) {
+    profileHeader.textContent = `Username - ${user.username}`;
+  }
+
+  const profileUser = document.getElementById('profileID');
+  if (profileUser) {
+    profileUser.textContent = `Unique User ID - ${user.user_id}`;
+  }
+}
+
 
   if (dbSearchForm) {
     dbSearchForm.addEventListener('submit', (e) => {
@@ -420,9 +452,12 @@ document.addEventListener('click', (e) => {
   });
 
 function updateGuestRestrictions() {
-    document.querySelectorAll('.requires-login').forEach(btn => {
-      btn.classList.toggle('disabled', !isLoggedIn());
-    });
+     const loggedIn = isLoggedIn();
+
+  document.querySelectorAll('.requires-login').forEach(el => {
+    el.disabled = !loggedIn;
+    el.classList.toggle('disabled', !loggedIn);
+  });
   }
 
 
@@ -481,8 +516,7 @@ createTaskForm.addEventListener('submit', async (e) => {
       return;
     }
 
-    // Optional: refresh user's task list
-    loadMyTasks();
+    
 
     createTaskForm.reset();
     alert('Task created successfully');
