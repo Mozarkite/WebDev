@@ -231,6 +231,62 @@ app.get('/my-tasks', authMiddleware, async (req, res) => {
   }
 });
 
+app.post('/create-user-task', authMiddleware, async (req, res) => {
+  try {
+    const {
+      task_name,
+      task_category,
+      task_importance,
+      task_time_limit
+    } = req.body;
+
+    if (!task_name || !task_category || !task_importance) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    //Insert into User_tasks
+    const userTaskResult = await pool.query(`
+      INSERT INTO User_tasks
+        (user_id, task_name, task_category, task_importance, task_time_limit)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING *
+    `, [
+      req.user.user_id,
+      task_name,
+      task_category,
+      task_importance,
+      task_time_limit || null
+    ]);
+
+    const userTask = userTaskResult.rows[0];
+
+    //Insert into User_to_do_list
+    const todoResult = await pool.query(`
+      INSERT INTO User_to_do_list
+        (user_id, user_task_id, task_name, task_category, task_importance, task_time_limit)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *
+    `, [
+      req.user.user_id,
+      userTask.task_id,
+      userTask.task_name,
+      userTask.task_category,
+      userTask.task_importance,
+      userTask.task_time_limit
+    ]);
+
+    res.json({
+      success: true,
+      user_task: userTask,
+      todo: todoResult.rows[0]
+    });
+
+  } catch (err) {
+    console.error('Create user task error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 
 
 
