@@ -53,6 +53,30 @@ if (protectedPages.includes(initialPage) && !isLoggedIn()) {
 }
 
 
+document.addEventListener('click', (e) => {
+  const heart = e.target.closest('.task-heart');
+  if (!heart) return;
+
+  if (!isLoggedIn()) {
+    requireLoginMessage();
+    return;
+  }
+
+  const taskId = heart.dataset.taskId;
+  const favKey = `fav_task_${taskId}`;
+  const isFav = localStorage.getItem(favKey) === 'true';
+
+  if (isFav) {
+    localStorage.removeItem(favKey);
+    heart.style.color = 'grey';
+  } else {
+    localStorage.setItem(favKey, 'true');
+    heart.style.color = 'red';
+  }
+});
+
+
+
 /*
 -----------------------------------------------------------
 SPA navigation for pages
@@ -530,15 +554,35 @@ async function loadTaskHistory() {
   //Use the correct primary key column from User_tasks table
   const userTasks = data.tasks; //no filtering
 
-  list.innerHTML = userTasks.map(t => `
-    <div class="mb-2 p-2 rounded bg-dark">
-      <strong>${escapeHtml(t.task_name)}</strong><br>
-      <small>
-        ${escapeHtml(t.task_category)} |
-        Importance: ${t.task_importance}
-      </small>
+  list.innerHTML = userTasks.map(t => {
+  const favKey = `fav_task_${t.todo_id}`;
+  const isFav = localStorage.getItem(favKey) === 'true';
+
+  return `
+    <div class="mb-2 p-2 rounded bg-dark d-flex justify-content-between align-items-center">
+      <div>
+        <strong>${escapeHtml(t.task_name)}</strong><br>
+        <small>
+          ${escapeHtml(t.task_category)} |
+          Importance: ${t.task_importance}
+        </small>
+      </div>
+
+      <span 
+        class="task-heart"
+        data-task-id="${t.todo_id}"
+        style="
+          cursor: pointer;
+          font-size: 1.4rem;
+          color: ${isFav ? 'red' : 'grey'};
+          user-select: none;
+        "
+      >
+        ♥
+      </span>
     </div>
-  `).join('');
+  `;
+}).join('');
 
 
 
