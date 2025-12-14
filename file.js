@@ -42,7 +42,7 @@ function generateToken(user) {
 
 function authMiddleware(req, res, next) {
 
-  //Expect Authorization: Bearer <token>
+  //Expect Authorization: Bearer l<token>
   const authHeader = req.headers['authorization'];
   if (!authHeader) return res.status(401).json({ error: 'Missing Authorization header' });
 
@@ -102,7 +102,7 @@ app.post('/login', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Missing fields' });
 
-    const query = `SELECT user_id, username, email, password FROM Users WHERE email = $1`;
+    const query = `SELECT user_id, username, email, password= FROM Users WHERE email = $1`;
     const result = await pool.query(query, [email]);
     if (result.rows.length === 0) return res.status(400).json({ error: 'Invalid email or password' });
 
@@ -210,6 +210,7 @@ app.post('/delete-account', authMiddleware, async (req, res) => {
       [req.user.user_id]
     );
 
+    //No database rows were affected and transaction is rolled back
     if (result.rowCount === 0) {
       await client.query('ROLLBACK');
       return res.json({ success: false, error: 'User not found' });
@@ -222,6 +223,7 @@ app.post('/delete-account', authMiddleware, async (req, res) => {
     await client.query('ROLLBACK');
     console.error('Delete account error:', err);
     res.status(500).json({ success: false, error: 'Server error' });
+    //Ensures no connections are leaked
   } finally {
     client.release();
   }
@@ -440,31 +442,6 @@ app.post('/create-user-task', authMiddleware, async (req, res) => {
   }
 });
 
-
-/*
-|--------------------------------------------------------------------------
-|Task category distribution (see analytics / charts)
-|--------------------------------------------------------------------------
-|Aggregates all active to-do tasks by category.
-*/
-app.get('/task-category-distribution', authMiddleware, async (req, res) => {
-  try {
-    const result = await pool.query(
-      `
-      SELECT task_category, COUNT(*) AS count
-      FROM User_to_do_list
-      WHERE user_id = $1
-      GROUP BY task_category
-      `,
-      [req.user.user_id]
-    );
-
-    res.json({ success: true, data: result.rows });
-  } catch (err) {
-    console.error('Category distribution error:', err);
-    res.status(500).json({ success: false, error: 'Server error' });
-  }
-});
 
 
 /*
