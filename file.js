@@ -344,7 +344,7 @@ app.post('/create-user-task', authMiddleware, async (req, res) => {
   } catch (err) {
     console.error('Create user task error:', err);
     res.status(500).json({ error: 'Server error' });
-  }
+  }2
 });
 
 app.get('/task-category-distribution', authMiddleware, async (req, res) => {
@@ -362,6 +362,105 @@ app.get('/task-category-distribution', authMiddleware, async (req, res) => {
     res.status(500).json({ success: false, error: 'Server error' });
   }
 });
+
+app.post('/toggle-user-task-favourite', authMiddleware, async (req, res) => {
+  const { user_task_id } = req.body;
+
+  if (!user_task_id) {
+    return res.status(400).json({ success: false, error: 'user_task_id required' });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    // Ensure the task belongs to the logged-in user
+    const owned = await client.query(
+      `
+      SELECT task_id
+      FROM User_tasks
+      WHERE task_id = $1 AND user_id = $2
+      `,
+      [user_task_id, req.user.user_id]
+    );
+
+    if (owned.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(403).json({ success: false, error: 'Task not found or not yours' });
+    }
+
+    // Check if already favourited
+    const existing = await client.query(
+      `
+      SELECT favourite_id
+      FROM User_favourited_tasks
+      WHERE user_id = $1 AND user_task_id = $2
+      `,
+      [req.user.user_id, user_task_id]
+    );
+
+    if (existing.rows.length > 0) {
+      // Unfavourite
+      await client.query(
+        `DELETE FROM User_favourited_tasks WHERE favourite_id = $1`,
+        [existing.rows[0].favourite_id]
+      );
+
+      await client.query('COMMIT');
+      return res.json({ success: true, favourited: false });
+    }
+
+    // Favourite (db_task_id must be NULL)
+    await client.query(
+      `
+      INSERT INTO User_favourited_tasks (user_id, user_task_id, db_task_id)
+      VALUES ($1, $2, NULL)
+      `,
+      [req.user.user_id, user_task_id]
+    );
+
+    await client.query('COMMIT');
+    res.json({ success: true, favourited: true });
+
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('toggle-user-task-favourite error:', err);
+    res.status(500).json({ success: false, error: 'Server error' });
+  } finally {
+    client.release();
+  }
+});
+
+app.get('/favourite-user-tasks', authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `
+      SELECT
+        ut.task_id AS user_task_id,
+        ut.task_name,
+        ut.task_category,
+        ut.task_importance,
+        ut.task_time_limit,
+        ft.favourited_at
+      FROM User_favourited_tasks ft
+      JOIN User_tasks ut ON ft.user_task_id = ut.task_id
+      WHERE ft.user_id = $1
+      ORDER BY ft.favourited_at DESC
+      `,
+      [req.user.user_id]
+    );
+
+    res.json({ success: true, tasks: result.rows });
+  } catch (err) {
+    console.error('favourite-user-tasks error:', err);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+
+
+
 
 
 
