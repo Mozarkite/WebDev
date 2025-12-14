@@ -1,21 +1,36 @@
-// server.js
+//server.js
 require('dotenv').config();
+
+//Core dependencies
 const express = require('express');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const pool = require('./db'); // your existing pg pool
+
+const pool = require('./db'); //db.js handles PostgreSQL connection pooling
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'replace_this_with_strong_secret';
 
-//Middleware
+
+/*
+|--------------------------------------------------------------------------
+| Global Middleware
+|--------------------------------------------------------------------------
+*/
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); //Parses data from html forms
 app.use(express.static(__dirname)); //Manages images, files etc from the directory
 
-//Auth Helpers
+
+/*
+|--------------------------------------------------------------------------
+| Authentication Helpers
+|--------------------------------------------------------------------------
+*/
+
 function generateToken(user) {
   //user: user_id, username, email 
   return jwt.sign(
@@ -38,18 +53,24 @@ function authMiddleware(req, res, next) {
   const token = parts[1];
   try {
     const payload = jwt.verify(token, JWT_SECRET);
-    req.user = payload; // { user_id, username, email, iat, exp }
+    req.user = payload; //{ user_id, username, email, iat, exp }
     next();
   } catch (err) {
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
 }
 
-//Public Routes
+/*
+|--------------------------------------------------------------------------
+| Public Authentication Routes
+|--------------------------------------------------------------------------
+*/
 
 //Post Register
 app.post('/register', async (req, res) => {
   try {
+
+    //Basiv validation
     const { username, email, password } = req.body;
     if (!username || !email || !password) return res.status(400).json({ error: 'Username, email, and password are required' });
 
@@ -68,12 +89,14 @@ app.post('/register', async (req, res) => {
     res.json({ success: true, user, token });
   } catch (err) {
     console.error('Register error:', err);
+
+    //Unique violation for email
     if (err.code === '23505') res.status(400).json({ error: 'Email already exists' });
     else res.status(500).json({ error: 'Server error' });
   }
 });
 
-//Post Login
+//Post Login (authentication for existing users)
 app.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -94,6 +117,12 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+/*
+|--------------------------------------------------------------------------
+| Database Task Routes (Public)
+|--------------------------------------------------------------------------
+*/
 
 //DB tasks with scrollable view
 app.get('/db_tasks', async (req, res) => {
@@ -126,7 +155,11 @@ app.get('/db_tasks', async (req, res) => {
   }
 });
 
-
+/*
+|--------------------------------------------------------------------------
+| User Profile Routes (Protected)
+|--------------------------------------------------------------------------
+*/
 
 //Protect username update - must be logged in, change username for the logged-in user only
 app.post('/update-username', authMiddleware, async (req, res) => {
@@ -155,6 +188,7 @@ app.post('/update-username', authMiddleware, async (req, res) => {
   }
 });
 
+//Delete account and cascade delete related data
 app.post('/delete-account', authMiddleware, async (req, res) => {
   const client = await pool.connect();
 
@@ -193,6 +227,14 @@ app.post('/delete-account', authMiddleware, async (req, res) => {
   }
 });
 
+
+/*
+|--------------------------------------------------------------------------
+|Task Management Routes (Protected)
+|--------------------------------------------------------------------------
+*/
+
+//Add a premade DB task to user's to-do list
 app.post('/add-db-task', authMiddleware, async (req, res) => {
   try {
     const { task_id } = req.body;
@@ -235,36 +277,60 @@ app.post('/add-db-task', authMiddleware, async (req, res) => {
   }
 });
 
+/*
+|--------------------------------------------------------------------------
+|Load logged-in user's to-do list
+|--------------------------------------------------------------------------
+|Returns all tasks (DB + user-created) added to the user's active list.
+|Ordered by most recently added.
+*/
 app.get('/my-tasks', authMiddleware, async (req, res) => {
   try {
-    const result = await pool.query(`
+    const result = await pool.query(
+      `
       SELECT *
       FROM User_to_do_list
       WHERE user_id = $1
       ORDER BY added_at DESC
-    `, [req.user.user_id]);
+      `,
+      [req.user.user_id]
+    );
 
     res.json({ success: true, tasks: result.rows });
-
   } catch (err) {
     console.error('Load user tasks error:', err);
     res.json({ success: false, error: 'Server error' });
   }
 });
 
+
+/*
+|--------------------------------------------------------------------------
+|Mark a to-do task as completed
+|--------------------------------------------------------------------------
+|Only updates tasks that belong to the logged-in user.
+|Expects todo_id from the frontend.
+*/
 app.post('/complete-task', authMiddleware, async (req, res) => {
   try {
-    const { task_id } = req.body; //expects task_id from front-end
-    if (!task_id) return res.json({ success: false, error: 'task_id required' });
+    const { task_id } = req.body;
 
-    //Update only if the task belongs to the logged-in user
-    const result = await pool.query(`
+    // todo_id is required
+    if (!task_id) {
+      return res.json({ success: false, error: 'task_id required' });
+    }
+
+    const result = await pool.query(
+      `
       UPDATE User_to_do_list
       SET completed = TRUE
       WHERE todo_id = $1 AND user_id = $2
-      RETURNING *;
-    `, [task_id, req.user.user_id]); 
+      RETURNING *
+      `,
+      [task_id, req.user.user_id]
+    );
 
+    //Either task does not exist or does not belong to user
     if (result.rows.length === 0) {
       return res.json({ success: false, error: 'Task not found or not yours' });
     }
@@ -276,13 +342,25 @@ app.post('/complete-task', authMiddleware, async (req, res) => {
   }
 });
 
+
+/*
+|--------------------------------------------------------------------------
+|Load user-created tasks (NOT to-do list)
+|--------------------------------------------------------------------------
+|These are tasks authored by the user and used for:
+|- task history
+|- favouriting eligibility
+*/
 app.get('/user-tasks', authMiddleware, async (req, res) => {
   try {
-    const result = await pool.query(`
+    const result = await pool.query(
+      `
       SELECT *
       FROM User_tasks
       WHERE user_id = $1
-    `, [req.user.user_id]);
+      `,
+      [req.user.user_id]
+    );
 
     res.json({ success: true, tasks: result.rows });
   } catch (err) {
@@ -291,6 +369,15 @@ app.get('/user-tasks', authMiddleware, async (req, res) => {
   }
 });
 
+
+/*
+|--------------------------------------------------------------------------
+| Create a new user-authored task
+|--------------------------------------------------------------------------
+|Inserts into:
+|User_tasks (authoritative task definition)
+|User_to_do_list (active task instance)
+*/
 app.post('/create-user-task', authMiddleware, async (req, res) => {
   try {
     const {
@@ -300,61 +387,77 @@ app.post('/create-user-task', authMiddleware, async (req, res) => {
       task_time_limit
     } = req.body;
 
+    //Required fields validation
     if (!task_name || !task_category || !task_importance) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    //Insert into User_tasks
-    const userTaskResult = await pool.query(`
+    // Insert into User_tasks (ownership-based table)
+    const userTaskResult = await pool.query(
+      `
       INSERT INTO User_tasks
         (user_id, task_name, task_category, task_importance, task_time_limit)
       VALUES ($1, $2, $3, $4, $5)
       RETURNING *
-    `, [
-      req.user.user_id,
-      task_name,
-      task_category,
-      task_importance,
-      task_time_limit || null
-    ]);
+      `,
+      [
+        req.user.user_id,
+        task_name,
+        task_category,
+        task_importance,
+        task_time_limit || null
+      ]
+    );
 
     const userTask = userTaskResult.rows[0];
 
-    //Insert into User_to_do_list
-    const todoResult = await pool.query(`
+    //Insert into User_to_do_list (active instance)
+    const todoResult = await pool.query(
+      `
       INSERT INTO User_to_do_list
         (user_id, user_task_id, task_name, task_category, task_importance, task_time_limit)
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
-    `, [
-      req.user.user_id,
-      userTask.task_id,
-      userTask.task_name,
-      userTask.task_category,
-      userTask.task_importance,
-      userTask.task_time_limit
-    ]);
+      `,
+      [
+        req.user.user_id,
+        userTask.task_id,
+        userTask.task_name,
+        userTask.task_category,
+        userTask.task_importance,
+        userTask.task_time_limit
+      ]
+    );
 
     res.json({
       success: true,
       user_task: userTask,
       todo: todoResult.rows[0]
     });
-
   } catch (err) {
     console.error('Create user task error:', err);
     res.status(500).json({ error: 'Server error' });
-  }2
+  }
 });
 
+
+/*
+|--------------------------------------------------------------------------
+|Task category distribution (see analytics / charts)
+|--------------------------------------------------------------------------
+|Aggregates all active to-do tasks by category.
+*/
 app.get('/task-category-distribution', authMiddleware, async (req, res) => {
   try {
-    const result = await pool.query(`
+    const result = await pool.query(
+      `
       SELECT task_category, COUNT(*) AS count
       FROM User_to_do_list
       WHERE user_id = $1
       GROUP BY task_category
-    `, [req.user.user_id]);
+      `,
+      [req.user.user_id]
+    );
 
     res.json({ success: true, data: result.rows });
   } catch (err) {
@@ -363,6 +466,15 @@ app.get('/task-category-distribution', authMiddleware, async (req, res) => {
   }
 });
 
+
+/*
+|--------------------------------------------------------------------------
+|Toggle favourite for user-created tasks only
+|--------------------------------------------------------------------------
+| -Enforces ownership
+| -Ensures no DB tasks are favourited here
+| -Uses transaction for atomic toggle
+*/
 app.post('/toggle-user-task-favourite', authMiddleware, async (req, res) => {
   const { user_task_id } = req.body;
 
@@ -375,7 +487,7 @@ app.post('/toggle-user-task-favourite', authMiddleware, async (req, res) => {
   try {
     await client.query('BEGIN');
 
-    // Ensure the task belongs to the logged-in user
+    // Ensure task belongs to user
     const owned = await client.query(
       `
       SELECT task_id
@@ -390,7 +502,7 @@ app.post('/toggle-user-task-favourite', authMiddleware, async (req, res) => {
       return res.status(403).json({ success: false, error: 'Task not found or not yours' });
     }
 
-    // Check if already favourited
+    // Check current favourite state
     const existing = await client.query(
       `
       SELECT favourite_id
@@ -400,8 +512,8 @@ app.post('/toggle-user-task-favourite', authMiddleware, async (req, res) => {
       [req.user.user_id, user_task_id]
     );
 
+    // Unfavourite
     if (existing.rows.length > 0) {
-      // Unfavourite
       await client.query(
         `DELETE FROM User_favourited_tasks WHERE favourite_id = $1`,
         [existing.rows[0].favourite_id]
@@ -411,7 +523,7 @@ app.post('/toggle-user-task-favourite', authMiddleware, async (req, res) => {
       return res.json({ success: true, favourited: false });
     }
 
-    // Favourite (db_task_id must be NULL)
+    // Favourite
     await client.query(
       `
       INSERT INTO User_favourited_tasks (user_id, user_task_id, db_task_id)
@@ -432,6 +544,13 @@ app.post('/toggle-user-task-favourite', authMiddleware, async (req, res) => {
   }
 });
 
+
+/*
+|--------------------------------------------------------------------------
+| Load favourited user-created tasks
+|--------------------------------------------------------------------------
+| Used exclusively by the Favourite Tasks page.
+*/
 app.get('/favourite-user-tasks', authMiddleware, async (req, res) => {
   try {
     const result = await pool.query(
@@ -459,15 +578,51 @@ app.get('/favourite-user-tasks', authMiddleware, async (req, res) => {
 });
 
 
+/*
+|--------------------------------------------------------------------------
+|Fetch favourited task IDs (for UI state sync)
+|--------------------------------------------------------------------------
+|Used to pre-render hearts correctly on page load.
+*/
+app.get('/favourited-user-task-ids', authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `
+      SELECT user_task_id
+      FROM User_favourited_tasks
+      WHERE user_id = $1 AND user_task_id IS NOT NULL
+      `,
+      [req.user.user_id]
+    );
+
+    res.json({
+      success: true,
+      ids: result.rows.map(r => r.user_task_id)
+    });
+  } catch (err) {
+    console.error('favourited-user-task-ids error:', err);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
 
 
-
-
+/*
+|--------------------------------------------------------------------------
+|SPA Fallback
+|--------------------------------------------------------------------------
+*/
 
 //Fallback to index.html for SPA routes
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
+
+/*
+|--------------------------------------------------------------------------
+|Server Startup
+|--------------------------------------------------------------------------
+*/
+
 
 // Start
 app.listen(PORT, () => {

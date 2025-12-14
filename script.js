@@ -62,13 +62,11 @@ document.addEventListener('click', async (e) => {
   }
 
   const userTaskId = heart.dataset.userTaskId;
-  if (!userTaskId) return; // safety
+  const isActive = heart.classList.contains('active');
 
-  const wasRed = heart.classList.contains('active');
-
-  // optimistic UI
+  // Optimistic UI update
   heart.classList.toggle('active');
-  heart.style.color = wasRed ? 'grey' : 'red';
+  heart.style.color = isActive ? 'grey' : 'red';
 
   try {
     const res = await fetch('/toggle-user-task-favourite', {
@@ -83,19 +81,17 @@ document.addEventListener('click', async (e) => {
     const data = await res.json();
 
     if (!data.success) {
-      // rollback UI
+      // rollback on failure
       heart.classList.toggle('active');
-      heart.style.color = wasRed ? 'red' : 'grey';
-      alert(data.error || 'Could not favourite task');
+      heart.style.color = isActive ? 'red' : 'grey';
+      alert(data.error);
     }
   } catch (err) {
     heart.classList.toggle('active');
-    heart.style.color = wasRed ? 'red' : 'grey';
+    heart.style.color = isActive ? 'red' : 'grey';
     alert('Server error');
   }
 });
-
-
 
 /*
 -----------------------------------------------------------
@@ -563,42 +559,50 @@ async function loadTaskHistory() {
   const list = document.getElementById('taskHistoryList');
   if (!list) return;
 
-  const res = await fetch('/user-tasks', { headers: authHeaders() });
-  const data = await res.json();
+  // 1. Load user-created tasks
+  const tasksRes = await fetch('/user-tasks', { headers: authHeaders() });
+  const tasksData = await tasksRes.json();
 
-  if (!data.success || data.tasks.length === 0) {
+  if (!tasksData.success || tasksData.tasks.length === 0) {
     list.innerHTML = '<div>No tasks created yet.</div>';
     return;
   }
 
-  //Use the correct primary key column from User_tasks table
-  const userTasks = data.tasks; //no filtering
+  // 2. Load favourited task IDs
+  const favRes = await fetch('/favourited-user-task-ids', {
+    headers: authHeaders()
+  });
+  const favData = await favRes.json();
 
-  list.innerHTML = data.tasks.map(t => `
-  <div class="mb-2 p-2 rounded bg-dark d-flex justify-content-between align-items-center">
-    <div>
-      <strong>${escapeHtml(t.task_name)}</strong><br>
-      <small>
-        ${escapeHtml(t.task_category)} |
-        Importance: ${t.task_importance}
-      </small>
-    </div>
+  const favSet = new Set(favData.ids); // fast lookup
 
-    <span
-  class="task-heart"
-  data-user-task-id="${t.task_id}"
-  style="cursor:pointer;font-size:1.4rem;color:grey;"
-  title="Favourite"
->
-  ♥
-</span>
-  </div>
-`).join('');
+  // 3. Render tasks with correct heart state
+  list.innerHTML = tasksData.tasks.map(t => {
+    const isFav = favSet.has(t.task_id);
 
+    return `
+      <div class="mb-2 p-2 rounded bg-dark d-flex justify-content-between align-items-center">
+        <div>
+          <strong>${escapeHtml(t.task_name)}</strong><br>
+          <small>
+            ${escapeHtml(t.task_category)} |
+            Importance: ${t.task_importance}
+          </small>
+        </div>
 
-
-
+        <span
+          class="task-heart ${isFav ? 'active' : ''}"
+          data-user-task-id="${t.task_id}"
+          style="cursor:pointer;font-size:1.4rem;color:${isFav ? 'red' : 'grey'};"
+          title="Favourite"
+        >
+          ♥
+        </span>
+      </div>
+    `;
+  }).join('');
 }
+
 
 async function loadFavouriteTasks() {
   const favList = document.getElementById('favouriteList');
@@ -663,13 +667,16 @@ document.getElementById("userTaskList")?.addEventListener("click", async (e) => 
   const btn = e.target.closest(".complete-task-btn");
   if (!btn) return;
 
+  //Protected button
   if (!isLoggedIn()) {
     requireLoginMessage();
     return;
   }
 
+  //Gets the to do task id
   const taskId = btn.getAttribute("data-todo-id");
 
+  //Fetches complete-task route
   try {
     const res = await fetch("/complete-task", {
       method: "POST",
@@ -679,6 +686,7 @@ document.getElementById("userTaskList")?.addEventListener("click", async (e) => 
 
     const data = await res.json();
 
+    //If successful set button to completed
     if (data.success) {
       btn.textContent = "Completed";
       btn.disabled = true;
@@ -687,6 +695,7 @@ document.getElementById("userTaskList")?.addEventListener("click", async (e) => 
     } else {
       alert(data.error || "Could not complete task");
     }
+    //Error handling
   } catch (err) {
     console.error("Complete task error:", err);
     alert("Server error");
