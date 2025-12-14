@@ -115,7 +115,8 @@ npm install
 
 
 ### 4. Start the Server
-node file.js
+
+node file.js or npm start
 
 
 ### 5. Open in Browser
