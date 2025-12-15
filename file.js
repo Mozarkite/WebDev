@@ -102,7 +102,8 @@ app.post('/login', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Missing fields' });
 
-    const query = `SELECT user_id, username, email, password= FROM Users WHERE email = $1`;
+    const query = `SELECT user_id, username, email, password FROM Users WHERE email = $1`;
+
     const result = await pool.query(query, [email]);
     if (result.rows.length === 0) return res.status(400).json({ error: 'Invalid email or password' });
 
